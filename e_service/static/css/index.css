@@ -65,7 +65,7 @@
     color: rgb(5, 5, 24);
 }
 
-.right--nav > button {
+.right--nav > a {
     padding: .5rem .75rem;
     font-size: 1.2rem;
     border: none;
@@ -74,9 +74,10 @@
     background-color: green;
     cursor: pointer;
     color: white;
+    text-decoration: none;
 }
 
-.right--nav > button:hover {
+.right--nav > a:hover {
     cursor: pointer;
     background-color: whitesmoke;
     color: black;
@@ -112,7 +113,8 @@ main {
     margin-bottom: 20px;
 }
 
-.container > button {
+.btn-service {
+    text-decoration: none;
     width: 200px;
     border: none;
     color: white;
