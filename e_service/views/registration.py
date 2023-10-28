@@ -43,7 +43,7 @@ def register_trader():
         db.session.commit()
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_trader'))
 
     return render_template('registration.html')
 
@@ -77,7 +77,7 @@ def register_user():
         db.session.commit()
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('user_login'))
 
     return render_template('registration_user.html')
 

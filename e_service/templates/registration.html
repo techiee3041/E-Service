@@ -7,6 +7,15 @@
     <link href="{{ url_for('static', filename='css/form.css') }}" rel="stylesheet">
   </head>
   <body>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     <section>
         <div class="container">
         <form method="POST" action="/register/trader" class="form">
@@ -36,7 +45,8 @@
                 <label for="password_confirm" class="form-label">Confirm Password:</label>
                 <input type="password" name="password_confirm" class="form__inputs" required><br><br>
             </div>
-            <input type="submit" value="Sign Up" class="btn">
+            <button class="btn">Sign up</button>
+            <p>If already registered, login <a href="/login/trader">here</a></p>
         </form>
         </div>
     </section>

@@ -1,6 +1,6 @@
 from e_service.app import app, db
 import e_service.views.index
-
+from e_service.views.login import *
 from e_service.views.registration import *
 
 if __name__ == "__main__":

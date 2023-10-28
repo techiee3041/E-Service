@@ -36,6 +36,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    is_active = db.Column(db.Boolean, default=False)
 
     def __init__(self, full_name, email, phone_number, password):
         self.full_name = full_name
