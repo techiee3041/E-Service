@@ -1,7 +1,10 @@
-from flask import Flask, request, jsonify, redirect, url_for, flash, render_template
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from ..app import app, db
+from e_service.app import app, db
+from datetime import datetime
+from flask_login import UserMixin
+from flask_migrate import Migrate
+
+migrate = Migrate(app, db)
 
 
 class Trader(db.Model):
@@ -28,7 +31,7 @@ class Trader(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'user'
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +39,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=False)
 
     def __init__(self, full_name, email, phone_number, password):
@@ -49,15 +54,55 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
 
-class Category(db.Model):
+class Admin(UserMixin, db.Model):
+    __tablename__ = 'admin'
+
+    admin_id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False, unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def __init__(self, full_name, password, email):
+        self.full_name = full_name
+        self.set_password(password)
+        self.email = email
+
+    def get_id(self):
+        return (self.admin_id)
+    
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return True
+
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+
+
+class Category(UserMixin, db.Model):
     __tablename__ = 'category'
 
     cat_id = db.Column(db.Integer, primary_key=True)
     category_name = db.Column(db.String(100), nullable=False)
-
+    
     def __init__(self, category_name):
         self.category_name = category_name
+
 
 class Product(db.Model):
     __tablename__ = 'product'

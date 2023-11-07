@@ -9,7 +9,7 @@ from e_service.app import app, db
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-from e_service.models.data import Trader, User, Product, Category, Cords  # Import specific classes from data module
+from e_service.models.data import Trader, User, Product, Category, Cords, Admin # Import specific classes from data module
 
 @app.route('/register/trader', methods=['GET', 'POST'])
 def register_trader():
@@ -119,22 +119,55 @@ def register_product():
 
     return render_template('product_registration.html', categories=categories)
 
-@app.route('/register/category', methods=['GET', 'POST'])
-def Category():
-    if request.method == 'POST':
-        category_name = request.form['category_name']
+@app.route('/register/category', methods=['POST'])
+def register_category():
+    category_name = request.form['category_name']
 
-        new_category = Category(
-            category_name=category_name,
-        )
+    existing_category = Category.query.filter_by(category_name=category_name).first()
 
+    if existing_category:
+        flash('Category already exists!', 'danger')
+    else:
+        new_category = Category(category_name=category_name)
         db.session.add(new_category)
         db.session.commit()
+        flash('Category added successfully!', 'success')
 
-        flash('Registration successful! New category added.', 'success')
-        return redirect(url_for('trader_dashboard'))
+    return redirect(url_for('admin_dashboard'))
 
-    return render_template('category.html')
+
+@app.route('/register/admin', methods=['GET', 'POST'])
+def register_admin():
+    if request.method == 'POST':
+        full_name=request.form['full_name']
+        email = request.form['email']
+        password = request.form['password']
+        password_confirm = request.form['password_confirm']
+
+        # Check if the passwords match
+        if password != password_confirm:
+            flash('Passwords do not match. Please try again.', 'danger')
+            return redirect(url_for('register_admin'))
+
+        existing_admin = Admin.query.filter_by(email=email).first()
+        if existing_admin:
+            flash('Email address is already registered.', 'danger')
+            return redirect(url_for('register_admin'))
+
+        new_admin = Admin(
+            full_name=full_name,
+            email=email,
+            password=password
+        )
+
+        db.session.add(new_admin)
+        db.session.commit()
+
+        flash('Admin registration successful!', 'success')
+        return redirect(url_for('login_admin'))
+
+    return render_template('registration_admin.html')
+
 
 @app.route('/save_coordinates', methods=['POST'])
 def Cords():
