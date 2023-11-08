@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Service</title>
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -19,8 +21,15 @@
         </ul>
     </nav>
     <main>
-        <div class="body">
-            <h1>Available Services</h1>
+        <div>
+            <h1>Trader Dashboard</h1>
+            <button id="pinLocationButton">Pin Location</button>
+            <div id="mapContainer" style="height: 400px;"></div>
+            <input type="hidden" id="latitude" value="">
+            <input type="hidden" id="longitude" value="">
+            <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
+            <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+            <script src="{{ url_for('static', filename='js/user_map.js') }}"></script>
         </div>
     </main>
 </body>

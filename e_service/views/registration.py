@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, flash, redirect, url_for
+from flask import Flask, request, render_template, flash, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
@@ -72,6 +72,7 @@ def register_user():
             phone_number=phone_number,
             password=password
         )
+        print(new_user.password)
 
         db.session.add(new_user)
         db.session.commit()
@@ -169,17 +170,27 @@ def register_admin():
     return render_template('registration_admin.html')
 
 
-@app.route('/save_coordinates', methods=['POST'])
-def Cords():
+@app.route('/api/save_coordinates', methods=['POST'])
+def save_coordinates():
     if request.method == 'POST':
-        latitude = request.form['latitude']
-        longitude = request.form['longitude']
+        data = request.get_json()
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
 
         new_cords = Cords(latitude=latitude, longitude=longitude)
 
         db.session.add(new_cords)
         db.session.commit()
-        flash('pinned successful', 'success')
-        return redirect(url_for('pinning'))
 
-        return render_template('trader_dashboard.html')
+        response = {
+            'message': 'Coordinates saved successfully',
+            'latitude': latitude,
+            'longitude': longitude
+        }
+
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Invalid request method. Use POST.'
+        }
+        return jsonify(response), 405
