@@ -86,6 +86,7 @@ class Admin(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+    
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -101,6 +102,9 @@ class Category(UserMixin, db.Model):
     def __init__(self, category_name):
         self.category_name = category_name
 
+    def get_id(self):
+        return (self.cat_id)
+
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -114,6 +118,10 @@ class Product(db.Model):
         self.pro_name = pro_name
         self.pro_dec = pro_dec
         self.filename = filename
+        
+    def get_id(self):
+        return (self.pro_id)
+
 class Cords(db.Model):
     __tablename__ = 'cords'
 
@@ -124,4 +132,7 @@ class Cords(db.Model):
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude= longitude
+        
+    def get_id(self):
+        return (self.cord_id)
 

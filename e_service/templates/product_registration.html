@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Service</title>
+</head>
+<body>
+     <h1>Service Registration</h1>
+    <form action="/register/product" method="post" enctype="multipart/form-data">
+        <label for="pro_name">Service Name:</label>
+        <input type="text" id="pro_name" name="pro_name" required><br><br>
+
+        <label for="pro_dec">Service Description:</label><br>
+        <textarea id="pro_dec" name="pro_dec" rows="4" cols="50" required></textarea><br><br>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="file">Upload File:</label>
+        <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png, .gif" required><br><br>
+
+        <input type="submit" value="Register Product">
+    </form>
+</body>
+</html>

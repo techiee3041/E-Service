@@ -90,6 +90,10 @@ def register_product():
         pro_name = request.form['pro_name']
         pro_dec = request.form['pro_dec']
         category_id = request.form['category']  # Get the selected category ID
+        
+        UPLOAD_FOLDER = 'uploads'
+        if not os.path.exists(UPLOAD_FOLDER):
+             os.makedirs(UPLOAD_FOLDER)
 
         if 'file' not in request.files:
             flash('No file part', 'error')
@@ -109,7 +113,7 @@ def register_product():
                 pro_name=pro_name,
                 pro_dec=pro_dec,
                 filename=filename,
-                category_id=category_id  # Assign the selected category ID
+                #pro_id=category_id  # Assign the selected category ID
             )
 
             db.session.add(new_product)
