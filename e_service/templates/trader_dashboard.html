@@ -7,7 +7,8 @@
     <title>E-Service</title>
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
 </head>
 
 <body>
@@ -16,7 +17,7 @@
         <ul class="nav-list">
             <li class="nav-items"><a href="#">Home</a></li>
             <li class="nav-items"><a href="/logout">logout</a></li>
-            <li class="nav-items"><a href="#">{{ current_user.full_name }}</a></li>
+            <li class="nav-items"><a href="#">{{ current_user.full_name }}</a>WELCOME</li>
         </ul>
         <ul>
             <li><a href="/register/product" class="btn">Register service</a></li>

@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const mapContainer = document.getElementById('mapContainer');
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
-    
+
     // Get the current trader's ID from the template
     const currentTraderID = '{{ trader_id }}';
 
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             $.ajax({
-                url: '/api/save_coordinates', // Replace with your server endpoint
+                url: '/save_coordinates', // Replace with your server endpoint
                 type: 'POST',
                 data: JSON.stringify(data),
                 contentType: 'application/json',
