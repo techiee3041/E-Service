@@ -5,6 +5,8 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
+
+
 a {
     text-decoration: none;
 }
@@ -15,7 +17,8 @@ a {
     padding: 20px 50px;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(90deg, #800000 50%, #3498db 50%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .left--nav {
@@ -29,7 +32,7 @@ a {
     background-clip: text;
     color: transparent;
     margin-right: 20px;
-    
+
 }
 
 
@@ -156,3 +159,21 @@ main {
 .login:hover {
     text-decoration: underline;
 }
+ body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Additional styles for larger screens */
+
+        @media (max-width: 600px) {
+            /* Styles for screens up to 600 pixels wide (typical for mobile devices) */
+            body {
+                font-size: 14px; /* Adjust font size for better readability on smaller screens */
+            }
+
+            /* Add more mobile-specific styles as needed */
+        }

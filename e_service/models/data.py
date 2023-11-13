@@ -28,7 +28,7 @@ class Trader(db.Model, UserMixin):
 
     def get_id(self):
         return (self.trader_id)
-        
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -52,13 +52,13 @@ class User(UserMixin, db.Model):
         self.email = email
         self.phone_number = phone_number
         self.set_password(password)
-        
+
     def get_id(self):
         return (self.id_user)
-        
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
-        
+
     def ping(self):
         self.last_seen = datetime.utcnow()
         db.session.add(self)
@@ -80,13 +80,13 @@ class Admin(UserMixin, db.Model):
 
     def get_id(self):
         return (self.admin_id)
-    
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
-    
+
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -98,7 +98,7 @@ class Category(UserMixin, db.Model):
 
     cat_id = db.Column(db.Integer, primary_key=True)
     category_name = db.Column(db.String(100), nullable=False)
-    
+
     def __init__(self, category_name):
         self.category_name = category_name
 
@@ -112,13 +112,17 @@ class Product(db.Model):
     pro_id = db.Column(db.Integer, primary_key=True)
     pro_name = db.Column(db.String(100), nullable=False)
     pro_dec = db.Column(db.String(300), nullable=False)
+    pro_cont = db.Column(db.String(10), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.cat_id'), nullable=False)
+    category = db.relationship('Category', backref=db.backref('product', lazy=True))
     filename = db.Column(db.String(255), unique=True, nullable=False)
 
-    def __init__(self, pro_name, pro_dec, filename):
+    def __init__(self, pro_name, pro_dec, pro_cont, filename, category):
         self.pro_name = pro_name
         self.pro_dec = pro_dec
+        self.pro_cont = pro_cont
         self.filename = filename
-        
+        self.category = category
     def get_id(self):
         return (self.pro_id)
 
@@ -132,7 +136,7 @@ class Cords(db.Model):
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude= longitude
-        
+
     def get_id(self):
         return (self.cord_id)
 

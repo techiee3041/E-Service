@@ -6,9 +6,9 @@ from e_service.app import app, db
 
 
 
-app.config['UPLOAD_FOLDER'] = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 from e_service.models.data import Trader, User, Product, Category, Cords, Admin # Import specific classes from data module
 
 @app.route('/register/trader', methods=['GET', 'POST'])
@@ -82,6 +82,7 @@ def register_user():
 
     return render_template('registration_user.html')
 
+
 @app.route('/register/product', methods=['GET', 'POST'])
 def register_product():
     categories = Category.query.all()  # Fetch all categories from the database
@@ -89,11 +90,8 @@ def register_product():
     if request.method == 'POST':
         pro_name = request.form['pro_name']
         pro_dec = request.form['pro_dec']
+        pro_cont = request.form['pro_cont']
         category_id = request.form['category']  # Get the selected category ID
-        
-        UPLOAD_FOLDER = 'uploads'
-        if not os.path.exists(UPLOAD_FOLDER):
-             os.makedirs(UPLOAD_FOLDER)
 
         if 'file' not in request.files:
             flash('No file part', 'error')
@@ -103,17 +101,18 @@ def register_product():
 
         if file.filename == '':
             flash('No selected file', 'error')
-            return redirect(url_for('list_files'))
+            return redirect(url_for('register_product'))
 
-        if file:
+        if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            new_product = Product(
+            new_product = product(
                 pro_name=pro_name,
                 pro_dec=pro_dec,
-                filename=filename,
-                #pro_id=category_id  # Assign the selected category ID
+                pro_cont=pro_cont,
+                category_id=category_id,  # Assign the selected category ID
+                filename=filename
             )
 
             db.session.add(new_product)
@@ -124,6 +123,9 @@ def register_product():
 
     return render_template('product_registration.html', categories=categories)
 
+# Helper function to check if the file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 @app.route('/register/category', methods=['POST'])
 def register_category():
     category_name = request.form['category_name']

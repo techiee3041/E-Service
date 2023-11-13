@@ -1,14 +1,16 @@
 from e_service.app import app
 from flask import jsonify, request
-from e_service.models.data import Trader, Cords
+from e_service.models.data import Trader, Cords , User
 from haversine import haversine
+import sys
+print(sys.path)
 
 # ...
 
-@app.route('/fetch_traders/<int:user_id>', methods=['GET'])
-def fetch_nearby_traders(user_id):
+@app.route('/fetch_traders/<int:id_user>', methods=['GET'])
+def fetch_nearby_traders(id_user):
     # Fetch the user's location
-    user_location = Cords.query.filter_by(user_id=user_id).first()
+    user_location = Cords.query.filter_by(id_user=id_user).first()
     if user_location is None:
         return jsonify({'error': 'User location not found'})
 
@@ -19,6 +21,7 @@ def fetch_nearby_traders(user_id):
 
     # Fetch nearby traders matching the selected traders_services
     nearby_traders = []
+
     for trader in Trader.query.filter_by(traders_services=selected_services).all():
         trader_lat, trader_lon = trader.latitude, trader.longitude
         distance = haversine(user_lat, user_lon, trader_lat, trader_lon)

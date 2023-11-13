@@ -66,12 +66,23 @@ h2 {
     border: 1px solid green;
 }
 
-.flash-messages > li {
+.flash-messages {
     list-style: none;
-    color: red;
+    padding: 0;
     text-align: center;
-    font-size: 1em;
+}
+
+.flash-messages li {
     padding: 1.5em;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+}
+
+/* Style for error messages */
+.flash-messages .error {
+    background-color: #ffdddd;
+    color: #dc3545;
+}
 }
 
 p > a {
@@ -83,4 +94,23 @@ p > a:hover {
 }
 p {
     text-align: start;
+}
+#pinLocationButton {
+    background-color: #ff69b4;  /* Pink color */
+    color: #fff;  /* White text color */
+    border: none;
+    padding: 10px 20px;  /* Adjust padding as needed */
+    cursor: pointer;
+    border-radius: 5px;  /* Optional: Rounded corners */
+    transition: background-color 0.3s;  /* Smooth transition effect */
+
+    /* Optional: Add more styles for hover and active states */
+}
+
+#pinLocationButton:hover {
+    background-color: #d1478e;  /* Lighter pink on hover */
+}
+
+#pinLocationButton:active {
+    background-color: #a0306f;  /* Darker pink on click */
 }

@@ -3,28 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Service</title>
+    <title>Product Registration</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9); /* Translucent white background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #ff69b4; /* Pink color */
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #d1478e; /* Lighter pink on hover */
+        }
+    </style>
 </head>
 <body>
-     <h1>Service Registration</h1>
-    <form action="/register/product" method="post" enctype="multipart/form-data">
-        <label for="pro_name">Service Name:</label>
+    <h1>Product Registration</h1>
+
+    <form method="POST" action="/register/product" enctype="multipart/form-data">
+        <label for="pro_name">Product Name:</label>
         <input type="text" id="pro_name" name="pro_name" required><br><br>
 
-        <label for="pro_dec">Service Description:</label><br>
+        <label for="pro_dec">Product Description:</label><br>
         <textarea id="pro_dec" name="pro_dec" rows="4" cols="50" required></textarea><br><br>
+
+        <label for="pro_cont">Business Contact:</label>
+        <input type="text" id="pro_cont" name="pro_cont" required><br><br>
 
         <label for="category">Category:</label>
         <select id="category" name="category" required>
             {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
+                <option value="{{ category.cat_id }}">{{ category.category_name }}</option>
             {% endfor %}
         </select><br><br>
 
         <label for="file">Upload File:</label>
         <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png, .gif" required><br><br>
 
-        <input type="submit" value="Register Product">
+        <button type="submit">Register Product</button>
     </form>
 </body>
 </html>
