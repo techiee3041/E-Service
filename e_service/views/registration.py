@@ -6,10 +6,11 @@ from e_service.app import app, db
 
 
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+# UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
-from e_service.models.data import Trader, User, Product, Category, Cords, Admin # Import specific classes from data module
+from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin # Import specific classes from data module
 
 @app.route('/register/trader', methods=['GET', 'POST'])
 def register_trader():
@@ -107,7 +108,7 @@ def register_product():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            new_product = product(
+            new_product = Product(
                 pro_name=pro_name,
                 pro_dec=pro_dec,
                 pro_cont=pro_cont,
@@ -183,7 +184,7 @@ def save_coordinates():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
 
-        new_cords = Cords(latitude=latitude, longitude=longitude)
+        new_cords = UserLocation(latitude=latitude, longitude=longitude)
 
         db.session.add(new_cords)
         db.session.commit()

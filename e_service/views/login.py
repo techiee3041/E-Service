@@ -105,7 +105,7 @@ def trader_dashboard():
     return render_template('trader_dashboard.html', trader_id=trader_id, current_user=current_user)
 
 @app.route('/admin/dashboard')
-@login_required
+#@login_required
 def admin_dashboard():
     categories = Category.query.all()
     return render_template('admin_dashboard.html', categories=categories)

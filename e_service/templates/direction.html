@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trader Tracking</title>
+    <!-- Add Mapbox CSS link here if needed -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Your map container -->
+<div id="mapContainer" style="height: 400px;"></div>
+
+<!-- Button to track the trader -->
+<button id="trackTraderButton">Track Trader</button>
+
+<!-- Container for displaying turn-by-turn directions -->
+<div id="directions-list"></div>
+
+<!-- Add Mapbox JS script here -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+
+<!-- Your JavaScript code -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mapboxglAccessToken = 'pk.eyJ1IjoiZG9yZWVuMzAiLCJhIjoiY2xvOW10Nmg3MGRqZTJrcXFpMTZjaThpbyJ9.ZjtZO_sTrQyLIS8STM9x_g';
+        const mapContainer = document.getElementById('mapContainer');
+        const trackTraderButton = document.getElementById('trackTraderButton');
+        const directionsList = document.getElementById('directions-list');
+
+        let userLat, userLon;  // You need to set these values based on the user's location
+        let traderLat, traderLon;  // You need to set these values based on the trader's location
+
+        // Fetch user and trader locations dynamically from the server
+        fetch('/fetch_user_and_trader_locations')
+            .then(response => response.json())
+            .then(data => {
+                userLat = data.userLat;
+                userLon = data.userLon;
+                traderLat = data.traderLat;
+                traderLon = data.traderLon;
+
+                // Initialize Mapbox map with the trader's location
+                mapboxgl.accessToken = mapboxglAccessToken;
+                const map = new mapboxgl.Map({
+                    container: 'mapContainer',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [traderLon, traderLat], // Initialize with trader's location
+                    zoom: 12, // Initial zoom level
+                });
+
+                // Function to calculate and display route
+                function calculateAndDisplayRoute() {
+                    const start = `${userLon},${userLat}`;
+                    const end = `${traderLon},${traderLat}`;
+                    const directionsUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${start};${end}?access_token=${mapboxglAccessToken}`;
+
+                    fetch(directionsUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.routes && data.routes.length > 0) {
+                                // Extract route information
+                                const route = data.routes[0];
+
+                                // Extract step-by-step directions
+                                const steps = route.legs[0].steps;
+
+                                // Display the route on the map
+                                map.addLayer({
+                                    id: 'route',
+                                    type: 'line',
+                                    source: {
+                                        type: 'geojson',
+                                        data: {
+                                            type: 'Feature',
+                                            properties: {},
+                                            geometry: {
+                                                type: 'LineString',
+                                                coordinates: route.geometry.coordinates,
+                                            },
+                                        },
+                                    },
+                                    layout: {
+                                        'line-join': 'round',
+                                        'line-cap': 'round',
+                                    },
+                                    paint: {
+                                        'line-color': '#3887BE',
+                                        'line-width': 5,
+                                    },
+                                });
+
+                                // Display turn-by-turn directions to the user
+                                steps.forEach((step, index) => {
+                                    const direction = document.createElement('div');
+                                    direction.textContent = `${index + 1}. ${step.maneuver.instruction}`;
+                                    directionsList.appendChild(direction);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
+
+                // When the "Track Trader" button is clicked, calculate and display the route
+                trackTraderButton.addEventListener('click', calculateAndDisplayRoute);
+            })
+            .catch(error => {
+                console.error('Error fetching user and trader locations:', error);
+            });
+    });
+</script>
+
+</body>
+</html>

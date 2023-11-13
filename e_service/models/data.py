@@ -7,6 +7,25 @@ from flask_migrate import Migrate
 
 migrate = Migrate(app, db)
 
+# Intermediate tables to represent many-to-many relationships
+trader_product_association = db.Table(
+    'trader_product_association',
+    db.Column('trader_id', db.Integer, db.ForeignKey('traders.trader_id')),
+    db.Column('product_id', db.Integer, db.ForeignKey('product.pro_id'))
+)
+
+product_category_association = db.Table(
+    'product_category_association',
+    db.Column('product_id', db.Integer, db.ForeignKey('product.pro_id')),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.cat_id'))
+)
+
+# Additional intermediate table for many-to-many relationship between Trader and Category
+trader_category_association = db.Table(
+    'trader_category_association',
+    db.Column('trader_id', db.Integer, db.ForeignKey('traders.trader_id')),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.cat_id'))
+)
 
 class Trader(db.Model, UserMixin):
     __tablename__ = 'traders'
@@ -18,6 +37,9 @@ class Trader(db.Model, UserMixin):
     business_name = db.Column(db.String(100), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+    coords = db.relationship('TraderLocation', backref='user', lazy=True)
+    services = db.relationship('Product', secondary=trader_product_association, backref='traders', lazy='dynamic')
+
 
     def __init__(self, full_name, email, phone_number, business_name, password):
         self.full_name = full_name
@@ -46,6 +68,7 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    coords = db.relationship('UserLocation', backref='user', lazy=True)
 
     def __init__(self, full_name, email, phone_number, password):
         self.full_name = full_name
@@ -117,19 +140,35 @@ class Product(db.Model):
     category = db.relationship('Category', backref=db.backref('product', lazy=True))
     filename = db.Column(db.String(255), unique=True, nullable=False)
 
-    def __init__(self, pro_name, pro_dec, pro_cont, filename, category):
+    def __init__(self, pro_name, pro_dec, pro_cont, filename, category_id):
         self.pro_name = pro_name
         self.pro_dec = pro_dec
         self.pro_cont = pro_cont
         self.filename = filename
-        self.category = category
+        self.category_id = category_id
     def get_id(self):
         return (self.pro_id)
 
-class Cords(db.Model):
-    __tablename__ = 'cords'
+class UserLocation(db.Model):
+    __tablename__ = 'userlocation'
 
     cord_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id_user'), nullable=False)
+    latitude = db.Column(db.Float(100), nullable=False)
+    longitude = db.Column(db.Float(100), nullable=False)
+
+    def __init__(self, latitude, longitude):
+        self.latitude = latitude
+        self.longitude= longitude
+
+    def get_id(self):
+        return (self.cord_id)
+
+class TraderLocation(db.Model):
+    __tablename__ = 'Traderlocation'
+
+    cord_id = db.Column(db.Integer, primary_key=True)
+    trader_id = db.Column(db.Integer, db.ForeignKey('traders.trader_id'), nullable=False)
     latitude = db.Column(db.Float(100), nullable=False)
     longitude = db.Column(db.Float(100), nullable=False)
 
