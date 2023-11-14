@@ -13,7 +13,7 @@
         <h1>E-service</h1>
         <ul class="nav-list">
             <li class="nav-items"><a href="#">Home</a></li>
-            <li class="nav-items"><a href="#">Find Service</a></li>
+            <li class="nav-items"><a href="{{ url_for('fetch_user_and_trader_locations', user_id=user_id) }}">Find Service</a></li>
             <li class="nav-items"><a href="/logout">logout</a></li>
         </ul>
         <ul>

@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 from e_service.app import app, db
+from haversine import haversine
+from flask_login import current_user
 
 
 
@@ -183,8 +185,9 @@ def save_coordinates():
         data = request.get_json()
         latitude = data.get('latitude')
         longitude = data.get('longitude')
+        user_id = current_user.trader_id
 
-        new_cords = UserLocation(latitude=latitude, longitude=longitude)
+        new_cords = UserLocation(latitude=latitude, longitude=longitude, user_id=user_id)
 
         db.session.add(new_cords)
         db.session.commit()
@@ -201,3 +204,51 @@ def save_coordinates():
             'message': 'Invalid request method. Use POST.'
         }
         return jsonify(response), 405
+
+@app.route('/fetch_user_and_trader_locations/<int:user_id>', methods=['GET'])
+def fetch_user_and_trader_locations(user_id):
+    user_id = current_user.trader_id
+    # Fetch the user's location
+    user_location = UserLocation.query.filter_by(user_id=user_id).first()
+    if user_location is None:
+        return jsonify({'error': 'User location not found'})
+
+    user_lat, user_lon = user_location.latitude, user_location.longitude
+
+    # Fetch nearby traders within 1km along with their services
+    nearby_traders = []
+
+    for trader_location in TraderLocation.query.all():
+        trader_lat, trader_lon = trader_location.latitude, trader_location.longitude
+        distance = haversine(user_lat, user_lon, trader_lat, trader_lon)
+
+        if distance <= 100000:
+            # Fetch services offered by the trader
+            trader_services = Product.query.filter_by(trader_id=trader_location.trader_id).all()
+
+            nearby_traders.append({
+                'trader_id': trader_location.trader_id,
+                'full_name': trader_location.trader.full_name,
+                'phone_number': trader_location.trader.phone_number,
+                'distance': distance,
+                'services': [{
+                    'category': service.category,
+                    'description': service.description,
+                    'product_name': service.product_name
+                } for service in trader_services]
+            })
+
+    # Organize traders into categories based on their services
+    categorized_traders = {}
+    for trader in nearby_traders:
+        for service in trader['services']:
+            category = service['category']
+            print(f'Trader ID: {trader["trader_id"]}, Category: {category}')  # Add this line
+            if category not in categorized_traders:
+                categorized_traders[category] = []
+
+            categorized_traders[category].append(trader)
+
+    print(categorized_traders)  # Add this line to print the categorized_traders
+    return render_template('nearby_traders.html', userLat=user_lat, userLon=user_lon, categorized_traders=categorized_traders, user_id=user_id)
+

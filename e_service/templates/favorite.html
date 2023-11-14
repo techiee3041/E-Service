@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Traders</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #008080;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        h3 {
+            color: #008080;
+        }
+
+        /* Add your additional styles here */
+
+    </style>
+</head>
+<body>
+    <h1>Favorite Traders</h1>
+
+    <!-- Display user's location -->
+    <p>User Location: Latitude - {{ userLat }}, Longitude - {{ userLon }}</p>
+
+    <!-- Display nearby traders -->
+    <ul>
+        {% for trader in nearby_traders %}
+            <li>
+                <h2>{{ trader['trader_id'] }} - {{ trader['full_name'] }}</h2>
+                <p>Phone Number: {{ trader['phone_number'] }}</p>
+                <p>Distance: {{ trader['distance'] }} km</p>
+                <h3>Service Details:</h3>
+                <ul>
+                    <li>Category: {{ trader['service']['category'] }}</li>
+                    <li>Description: {{ trader['service']['description'] }}</li>
+                    <li>Product Name: {{ trader['service']['product_name'] }}</li>
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add additional content or customize as needed -->
+
+    <!-- Include your JavaScript if required -->
+
+    <!-- Add your scripts here -->
+
+</body>
+</html>

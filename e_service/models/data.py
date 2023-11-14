@@ -157,9 +157,10 @@ class UserLocation(db.Model):
     latitude = db.Column(db.Float(100), nullable=False)
     longitude = db.Column(db.Float(100), nullable=False)
 
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude, longitude, user_id):
         self.latitude = latitude
         self.longitude= longitude
+        self.user_id = user_id
 
     def get_id(self):
         return (self.cord_id)
@@ -178,4 +179,4 @@ class TraderLocation(db.Model):
 
     def get_id(self):
         return (self.cord_id)
-
+    
