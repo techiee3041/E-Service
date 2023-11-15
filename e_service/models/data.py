@@ -139,6 +139,8 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.cat_id'), nullable=False)
     category = db.relationship('Category', backref=db.backref('product', lazy=True))
     filename = db.Column(db.String(255), unique=True, nullable=False)
+    # trader_id = db.Column(db.Integer, db.ForeignKey('traders.trader_id'), nullable=False)
+    # trader = db.relationship('Trader', backref=db.backref('products', lazy=True))
 
     def __init__(self, pro_name, pro_dec, pro_cont, filename, category_id):
         self.pro_name = pro_name
@@ -146,6 +148,7 @@ class Product(db.Model):
         self.pro_cont = pro_cont
         self.filename = filename
         self.category_id = category_id
+
     def get_id(self):
         return (self.pro_id)
 
@@ -173,9 +176,10 @@ class TraderLocation(db.Model):
     latitude = db.Column(db.Float(100), nullable=False)
     longitude = db.Column(db.Float(100), nullable=False)
 
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude, longitude, trader_id):
         self.latitude = latitude
         self.longitude= longitude
+        self.trader_id = trader_id
 
     def get_id(self):
         return (self.cord_id)

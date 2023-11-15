@@ -12,7 +12,7 @@ from flask_login import current_user
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
-from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin # Import specific classes from data module
+from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin, trader_product_association # Import specific classes from data module
 
 @app.route('/register/trader', methods=['GET', 'POST'])
 def register_trader():
@@ -185,9 +185,35 @@ def save_coordinates():
         data = request.get_json()
         latitude = data.get('latitude')
         longitude = data.get('longitude')
-        user_id = current_user.trader_id
+        user_id = current_user.id_user
 
         new_cords = UserLocation(latitude=latitude, longitude=longitude, user_id=user_id)
+
+        db.session.add(new_cords)
+        db.session.commit()
+
+        response = {
+            'message': 'Coordinates saved successfully',
+            'latitude': latitude,
+            'longitude': longitude
+        }
+
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Invalid request method. Use POST.'
+        }
+        return jsonify(response), 405
+    
+@app.route('/api/save_trader_coordinates', methods=['POST'])
+def save_trader_coordinates():
+    if request.method == 'POST':
+        data = request.get_json()
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        user_id = current_user.trader_id
+
+        new_cords = TraderLocation(latitude=latitude, longitude=longitude, trader_id=user_id)
 
         db.session.add(new_cords)
         db.session.commit()
@@ -207,7 +233,6 @@ def save_coordinates():
 
 @app.route('/fetch_user_and_trader_locations/<int:user_id>', methods=['GET'])
 def fetch_user_and_trader_locations(user_id):
-    user_id = current_user.trader_id
     # Fetch the user's location
     user_location = UserLocation.query.filter_by(user_id=user_id).first()
     if user_location is None:
@@ -220,16 +245,20 @@ def fetch_user_and_trader_locations(user_id):
 
     for trader_location in TraderLocation.query.all():
         trader_lat, trader_lon = trader_location.latitude, trader_location.longitude
-        distance = haversine(user_lat, user_lon, trader_lat, trader_lon)
+        print(f'user_lat: {user_lat}, user_lon: {user_lon}, trader_lat: {trader_lat}, trader_lon: {trader_lon}')
+        distance = haversine((user_lat, user_lon), (trader_lat, trader_lon))
+
 
         if distance <= 100000:
             # Fetch services offered by the trader
-            trader_services = Product.query.filter_by(trader_id=trader_location.trader_id).all()
+            trader_id = trader_location.trader_id
+            trader_info = db.session.query(Trader).filter_by(trader_id=trader_id).first()
+            trader_services = db.session.query(Product).join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
 
             nearby_traders.append({
                 'trader_id': trader_location.trader_id,
-                'full_name': trader_location.trader.full_name,
-                'phone_number': trader_location.trader.phone_number,
+                'full_name': trader_info.full_name,
+                'phone_number': trader_info.phone_number,
                 'distance': distance,
                 'services': [{
                     'category': service.category,
@@ -251,4 +280,3 @@ def fetch_user_and_trader_locations(user_id):
 
     print(categorized_traders)  # Add this line to print the categorized_traders
     return render_template('nearby_traders.html', userLat=user_lat, userLon=user_lon, categorized_traders=categorized_traders, user_id=user_id)
-

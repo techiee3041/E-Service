@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             $.ajax({
-                url: '/save_coordinates', // Replace with your server endpoint
+                url: '/api/save_trader_coordinates', // Replace with your server endpoint
                 type: 'POST',
                 data: JSON.stringify(data),
                 contentType: 'application/json',

@@ -5,7 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const longitudeInput = document.getElementById('longitude');
     
     // Get the current trader's ID from the template
-    const currentUserID = '{{ user_id }}';  // Assuming you pass this ID in the template
+    const currentUserID = '{{ user_id }}';  // Assuming you pass this ID in the templateconsole.log('Current User ID:', currentUserID);
+    console.log('Current User ID:', currentUserID);
+
+
 
     // Initialize Mapbox map
     mapboxgl.accessToken = 'pk.eyJ1IjoiZG9yZWVuMzAiLCJhIjoiY2xvOW10Nmg3MGRqZTJrcXFpMTZjaThpbyJ9.ZjtZO_sTrQyLIS8STM9x_g';
@@ -26,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
             latitudeInput.value = latitude;
             longitudeInput.value = longitude;
 
-            // Send the coordinates and trader's ID to the server using an AJAX request
+            // Send the coordinates and user's ID to the server using an AJAX request
             const data = {
                 latitude: latitude,
                 longitude: longitude,
@@ -34,14 +37,30 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             $.ajax({
-                url: '/api/save_coordinates', // Replace with your server endpoint
+                url: '/api/save_coordinates',
                 type: 'POST',
                 data: JSON.stringify(data),
                 contentType: 'application/json',
-                success: function (data) {
-                    // Handle the response from the server (if needed)
+                success: function (response) {
+                    // Handle the response from the server
+                    console.log(response); // Log the response to the console
+            
+                    // Check if the coordinates were saved successfully
+                    if (response && response.message === 'Coordinates saved successfully') {
+                        // Do something on success, like updating UI or showing a success message
+                        alert('Coordinates saved successfully');
+                    } else {
+                        // Handle other cases, such as an error response from the server
+                        alert('Failed to save coordinates. Please try again.');
+                    }
                 },
+                error: function (error) {
+                    // Handle errors that may occur during the AJAX request
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again later.');
+                }
             });
+            
 
             // Update the map's center and add a marker
             map.setCenter([longitude, latitude]);

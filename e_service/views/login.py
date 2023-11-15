@@ -18,15 +18,23 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    # Try loading a User first
+    user = User.query.get(int(user_id))
+    if user:
+        return user
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Admin.query.get(int(user_id))
+    # If User is not found, try loading a Trader
+    trader = Trader.query.get(int(user_id))
+    if trader:
+        return trader
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Trader.query.get(int(user_id))
+    # If Trader is not found, try loading an Admin
+    admin = Admin.query.get(int(user_id))
+    if admin:
+        return admin
+
+    # If no user is found, return None
+    return None
 # Login Form
 
 class LoginForm(FlaskForm):
@@ -90,11 +98,17 @@ def login_admin():
     
 
 @app.route('/user/dashboard')
-#@login_required
+@login_required
 def user_dashboard():
-    print(current_user.is_authenticated)
-    user_id = current_user.get_id()
-    return render_template('user_dashboard.html', user_id=user_id)
+    if isinstance(current_user, User):
+        print('Current user ID:', current_user.get_id())
+        return render_template('user_dashboard.html', user_id=current_user.get_id())
+    else:
+        print('Current user is not logged in or not a User instance')
+        # Handle the case where the user is not logged in or not a User instance
+        # You might want to redirect them to the login page or handle it appropriately.
+        return redirect(url_for('login_page'))
+
 
 
 @app.route('/trader/dashboard')
@@ -105,7 +119,7 @@ def trader_dashboard():
     return render_template('trader_dashboard.html', trader_id=trader_id, current_user=current_user)
 
 @app.route('/admin/dashboard')
-#@login_required
+@login_required
 def admin_dashboard():
     categories = Category.query.all()
     return render_template('admin_dashboard.html', categories=categories)
