@@ -138,7 +138,7 @@ class Product(db.Model):
     pro_cont = db.Column(db.String(10), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.cat_id'), nullable=False)
     category = db.relationship('Category', backref=db.backref('product', lazy=True))
-    filename = db.Column(db.String(255), unique=True, nullable=False)
+    filename = db.Column(db.String(255))
     # trader_id = db.Column(db.Integer, db.ForeignKey('traders.trader_id'), nullable=False)
     # trader = db.relationship('Trader', backref=db.backref('products', lazy=True))
 

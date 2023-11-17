@@ -1,0 +1,60 @@
+<!-- Include the necessary JavaScript libraries -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- Your HTML content -->
+
+<button id="findServiceBtn">Find Service</button>
+
+<div id="categoryList">
+  <!-- Display the list of categories here -->
+  {% for category in categories %}
+    <div class="categoryItem" data-category="{{ category.category_name }}">{{ category.category_name }}</div>
+  {% endfor %}
+</div>
+
+<div id="providerList">
+  <!-- Display the list of service providers here -->
+</div>
+
+<!-- JavaScript to handle button click and category selection -->
+<script>
+  $(document).ready(function () {
+    // Handle button click
+    $('#findServiceBtn').click(function () {
+      // Fetch and display the list of categories
+      $('#categoryList').toggle();
+    });
+
+    // Handle category selection
+    $('.categoryItem').click(function () {
+      var selectedCategory = $(this).data('category');
+      
+      // Make an AJAX request to fetch service providers for the selected category
+      $.ajax({
+        url: `/find_matching_providers/${selectedCategory}`,
+        type: 'GET',
+        success: function (response) {
+          // Display the results on the page
+          displayProviders(response.providers);
+        },
+        error: function (error) {
+          console.error('Error fetching providers:', error);
+        }
+      });
+    });
+
+    // Function to display service providers
+    function displayProviders(providers) {
+      var providerList = $('#providerList');
+      providerList.empty();
+
+      if (providers && providers.length > 0) {
+        $.each(providers, function (index, provider) {
+          providerList.append(`<div>${provider.full_name} (ID: ${provider.trader_id})</div>`);
+        });
+      } else {
+        providerList.append('<div>No providers found for the selected category</div>');
+      }
+    }
+  });
+</script>

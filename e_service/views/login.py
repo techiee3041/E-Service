@@ -114,9 +114,15 @@ def user_dashboard():
 @app.route('/trader/dashboard')
 @login_required
 def trader_dashboard():
-    trader_id = current_user.get_id()
-    print(current_user.is_authenticated)
-    return render_template('trader_dashboard.html', trader_id=trader_id, current_user=current_user)
+    if isinstance(current_user, Trader):
+        trader_id = current_user.trader_id
+        print(current_user.is_authenticated)
+        return render_template('trader_dashboard.html', trader_id=trader_id, current_user=current_user)
+    else:
+        print('Current user is not logged in or not a Trader instance')
+        # Handle the case where the user is not logged in or not a Trader instance
+        # You might want to redirect them to the login page or handle it appropriately.
+        return redirect(url_for('login_trader'))
 
 @app.route('/admin/dashboard')
 @login_required

@@ -12,7 +12,15 @@ from flask_login import current_user
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
-from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin, trader_product_association # Import specific classes from data module
+from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin, trader_product_association, trader_category_association # Import specific classes from data module
+
+if isinstance(current_user, Trader):
+    trader_id = current_user.trader_id
+    # Rest of your code for traders
+else:
+    print("trader not found")
+    # Handle the case for regular users
+
 
 @app.route('/register/trader', methods=['GET', 'POST'])
 def register_trader():
@@ -88,13 +96,13 @@ def register_user():
 
 @app.route('/register/product', methods=['GET', 'POST'])
 def register_product():
-    categories = Category.query.all()  # Fetch all categories from the database
+    categories = Category.query.all()
 
     if request.method == 'POST':
         pro_name = request.form['pro_name']
         pro_dec = request.form['pro_dec']
         pro_cont = request.form['pro_cont']
-        category_id = request.form['category']  # Get the selected category ID
+        category_id = request.form['category']
 
         if 'file' not in request.files:
             flash('No file part', 'error')
@@ -110,15 +118,22 @@ def register_product():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+            # Assuming you're using Flask-Login and the current_user is the logged-in trader
             new_product = Product(
                 pro_name=pro_name,
                 pro_dec=pro_dec,
                 pro_cont=pro_cont,
-                category_id=category_id,  # Assign the selected category ID
+                category_id=category_id,
                 filename=filename
             )
 
             db.session.add(new_product)
+            db.session.commit()
+
+            # Now, associate the product with the current trader
+            trader_id = current_user.trader_id
+            association_entry = trader_product_association.insert().values(trader_id=trader_id, product_id=new_product.pro_id)
+            db.session.execute(association_entry)
             db.session.commit()
 
             flash('Registration successful!', 'success')
@@ -251,9 +266,35 @@ def fetch_user_and_trader_locations(user_id):
 
         if distance <= 100000:
             # Fetch services offered by the trader
+
             trader_id = trader_location.trader_id
+            print(f"Trader ID: {trader_location.trader_id}")
+            trader = Trader.query.get(trader_id)
             trader_info = db.session.query(Trader).filter_by(trader_id=trader_id).first()
-            trader_services = db.session.query(Product).join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
+            # Fetch services provided by the trader
+            #trader_services = Product.query.join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
+            #print(f"Number of services fetched: {len(trader_services)}")
+            
+            print(f"Trader ID: {trader_location.trader_id}")
+
+            # Print data from trader_product_association
+            association_data = db.session.query(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
+            print(f"Association Data: {association_data}")
+
+            # Print data from the Product table
+            trader_products = db.session.query(Product).join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
+            print(f"Trader Products: {trader_products}")
+
+            
+            trader_services_query = Product.query.join(trader_product_association).filter_by(trader_id=trader_location.trader_id)
+            print(f"Query: {str(trader_services_query)}")
+            
+            trader_services = trader_services_query.all()
+            
+            # Now, iterate over the trader_services list
+            for service in trader_services:
+                # Access service attributes, e.g., service.pro_name, service.category, etc.
+                print(f"Service Name: {service.pro_name}, Category: {service.category.category_name}")
 
             nearby_traders.append({
                 'trader_id': trader_location.trader_id,
@@ -261,22 +302,38 @@ def fetch_user_and_trader_locations(user_id):
                 'phone_number': trader_info.phone_number,
                 'distance': distance,
                 'services': [{
-                    'category': service.category,
-                    'description': service.description,
-                    'product_name': service.product_name
+                    'category': service.category.category_name,
+                    'description': service.pro_dec,
+                    'product_name': service.pro_name
                 } for service in trader_services]
             })
+            
+            print("Nearby Traders:", nearby_traders)  # Add this line
 
-    # Organize traders into categories based on their services
-    categorized_traders = {}
-    for trader in nearby_traders:
-        for service in trader['services']:
-            category = service['category']
-            print(f'Trader ID: {trader["trader_id"]}, Category: {category}')  # Add this line
-            if category not in categorized_traders:
-                categorized_traders[category] = []
+            categorized_traders = {}
 
-            categorized_traders[category].append(trader)
+            for trader in nearby_traders:
+                trader_id = trader['trader_id']
+                trader_name = trader['full_name']
+                print(f'Trader ID: {trader_id}, Trader Name: {trader_name}')  # Add this line
 
-    print(categorized_traders)  # Add this line to print the categorized_traders
+                for service in trader['services']:
+                    category = service['category']
+                    print(f'  Category: {category}')  # Add this line
+
+                    if category not in categorized_traders:
+                        categorized_traders[category] = []
+
+                    categorized_traders[category].append({
+                        'trader_id': trader_id,
+                        'trader_name': trader_name,
+                        'category': category,
+                        'service': service,
+                    })
+
+            # Now you can print the categorized_traders dictionary
+            print(categorized_traders)
+
+
+
     return render_template('nearby_traders.html', userLat=user_lat, userLon=user_lon, categorized_traders=categorized_traders, user_id=user_id)
