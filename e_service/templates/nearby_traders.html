@@ -10,19 +10,15 @@
             margin: 0;
             padding: 0;
         }
-
-        nav {
-            background-color: #333;
-            color: white;
-            padding: 1em;
-            text-align: center;
-        }
-
         .category-section {
             margin: 20px;
             border: 1px solid #ccc;
             padding: 10px;
             border-radius: 8px;
+        }
+
+        .category-section > h2 {
+            text-align: center;
         }
 
         .trader {
@@ -74,50 +70,33 @@
 </head>
 <body>
 
-<nav>
-    <h1>E-service</h1>
-    <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="/nearby_traders">Find Service</a></li>
-        <li><a href="/logout">Logout</a></li>
-    </ul>
-    <ul>
-        <li class="username">Name {{ current_user.full_name }}</li>
-    </ul>
-</nav>
-
 <main>
-    <section id="user-location">
-        <h2>User Location</h2>
-        <p>Latitude: {{ userLat }}</p>
-        <p>Longitude: {{ userLon }}</p>
+{# <!-- Existing code for displaying categorized traders -->
+{% for category, traders in categorized_traders.items() %}
+    <section class="category-section">
+        <h2>{{ category }}</h2>
+        <ul>
+            {% for trader in traders %}
+                <li class="trader" data-trader-id="{{ trader['trader_id'] }}" onclick="openModal('{{ trader['trader_name'] }}', '{{ trader['service']['phone_number'] }}', '{{ trader['distance'] }}', '{{ trader['service']['category'] }}', '{{ trader['service']['description'] }}', '{{ trader['service']['product_name'] }}')">
+                    <h3>{{ trader['trader_name'] }}</h3>
+                    <p>Phone Number: {{ trader['service']['phone_number'] }}</p>
+                    <p>Distance: {{ trader['distance'] }} km</p>
+                    <h4>Services</h4>
+                    <ul>
+                        <li class="service">
+                            <p>Category: {{ trader['service']['category'] }}</p>
+                            <p>Description: {{ trader['service']['description'] }}</p>
+                            <p>Product Name: {{ trader['service']['product_name'] }}</p>
+                        </li>
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
     </section>
+{% endfor %} #}
 
-    {% for category, traders in categorized_traders.items() %}
-        <section class="category-section">
-            <h2>{{ category }}</h2>
-            <ul>
-                {% for trader in traders %}
-                    <li class="trader" data-trader-id="{{ trader['trader_id'] }}">
-                        <h3>{{ trader['full_name'] }}</h3>
-                        <p>Phone Number: {{ trader['phone_number'] }}</p>
-                        <p>Distance: {{ trader['distance'] }} km</p>
 
-                        <h4>Services</h4>
-                        <ul>
-                            {% for service in trader['services'] %}
-                                <li class="service">
-                                    <p>Category: {{ service['category'] }}</p>
-                                    <p>Description: {{ service['description'] }}</p>
-                                    <p>Product Name: {{ service['product_name'] }}</p>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% endfor %}
-            </ul>
-        </section>
-    {% endfor %}
+
 </main>
 
 <div class="modal">

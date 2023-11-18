@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template, flash, redirect, url_for, session
+from flask import Flask, request, render_template, flash, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_wtf import FlaskForm
 from wtforms.validators import Email, InputRequired
 from wtforms import StringField, PasswordField, SubmitField
 from e_service.app import app, db
-from flask import abort
+from .registration import fetch_user_and_trader_locations
+import json
+from datetime import datetime
 
 
 # Define User and Trader models in your 'data.py' file and import them here.
@@ -95,14 +97,33 @@ def login_admin():
         flash('Invalid email or password.', 'danger')
 
     return render_template('admin_login.html', form=form)
-    
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()    
 
 @app.route('/user/dashboard')
 @login_required
 def user_dashboard():
     if isinstance(current_user, User):
-        print('Current user ID:', current_user.get_id())
-        return render_template('user_dashboard.html', user_id=current_user.get_id())
+        user_id = current_user.get_id()
+        last_seen = current_user.last_seen
+        print('Current user ID:', user_id)
+
+        response = fetch_user_and_trader_locations(user_id)
+        
+        # Check if the response was successful (status code 200)
+        if response.status_code == 200:
+            categorized_traders_json = response.get_data()  # Decode bytes into a string
+            categorized_traders = json.loads(categorized_traders_json)  # Convert JSON string to dictionary
+            return render_template('user_dashboard.html', user_id=user_id, categorized_traders=categorized_traders, last_seen=last_seen)
+        else:
+            print(f"Error fetching data. Status code: {response.status_code}")
+            # Handle the error, e.g., redirect to an error page or show an error message
+            return render_template('error.html', error_message="Error fetching data")
+
     else:
         print('Current user is not logged in or not a User instance')
         # Handle the case where the user is not logged in or not a User instance

@@ -263,7 +263,6 @@ def fetch_user_and_trader_locations(user_id):
         print(f'user_lat: {user_lat}, user_lon: {user_lon}, trader_lat: {trader_lat}, trader_lon: {trader_lon}')
         distance = haversine((user_lat, user_lon), (trader_lat, trader_lon))
 
-
         if distance <= 100000:
             # Fetch services offered by the trader
 
@@ -271,9 +270,6 @@ def fetch_user_and_trader_locations(user_id):
             print(f"Trader ID: {trader_location.trader_id}")
             trader = Trader.query.get(trader_id)
             trader_info = db.session.query(Trader).filter_by(trader_id=trader_id).first()
-            # Fetch services provided by the trader
-            #trader_services = Product.query.join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
-            #print(f"Number of services fetched: {len(trader_services)}")
             
             print(f"Trader ID: {trader_location.trader_id}")
 
@@ -285,12 +281,11 @@ def fetch_user_and_trader_locations(user_id):
             trader_products = db.session.query(Product).join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
             print(f"Trader Products: {trader_products}")
 
-            
             trader_services_query = Product.query.join(trader_product_association).filter_by(trader_id=trader_location.trader_id)
             print(f"Query: {str(trader_services_query)}")
             
             trader_services = trader_services_query.all()
-            
+
             # Now, iterate over the trader_services list
             for service in trader_services:
                 # Access service attributes, e.g., service.pro_name, service.category, etc.
@@ -304,36 +299,33 @@ def fetch_user_and_trader_locations(user_id):
                 'services': [{
                     'category': service.category.category_name,
                     'description': service.pro_dec,
-                    'product_name': service.pro_name
+                    'product_name': service.pro_name,
+                    'phone_number': service.pro_cont
                 } for service in trader_services]
             })
-            
-            print("Nearby Traders:", nearby_traders)  # Add this line
 
-            categorized_traders = {}
+    # Categorize traders
+    categorized_traders = {}
 
-            for trader in nearby_traders:
-                trader_id = trader['trader_id']
-                trader_name = trader['full_name']
-                print(f'Trader ID: {trader_id}, Trader Name: {trader_name}')  # Add this line
+    for trader in nearby_traders:
+        trader_id = trader['trader_id']
+        trader_name = trader['full_name']
+        distance = trader['distance']
 
-                for service in trader['services']:
-                    category = service['category']
-                    print(f'  Category: {category}')  # Add this line
+        for service in trader['services']:
+            category = service['category']
 
-                    if category not in categorized_traders:
-                        categorized_traders[category] = []
+            if category not in categorized_traders:
+                categorized_traders[category] = []
 
-                    categorized_traders[category].append({
-                        'trader_id': trader_id,
-                        'trader_name': trader_name,
-                        'category': category,
-                        'service': service,
-                    })
+            categorized_traders[category].append({
+                'trader_id': trader_id,
+                'trader_name': trader_name,
+                'distance': distance,
+                'category': category,
+                'service': service,
+            })
 
-            # Now you can print the categorized_traders dictionary
-            print(categorized_traders)
-
-
-
-    return render_template('nearby_traders.html', userLat=user_lat, userLon=user_lon, categorized_traders=categorized_traders, user_id=user_id)
+    # Return the categorized traders as a dictionary
+    print(categorized_traders)
+    return jsonify(categorized_traders)
