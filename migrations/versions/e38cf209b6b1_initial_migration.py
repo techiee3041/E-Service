@@ -1,8 +1,8 @@
-"""mig
+"""Initial migration
 
-Revision ID: 8ea06a2cea0d
+Revision ID: e38cf209b6b1
 Revises: 
-Create Date: 2023-11-13 16:32:05.207433
+Create Date: 2023-11-20 10:22:01.957070
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8ea06a2cea0d'
+revision = 'e38cf209b6b1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -71,10 +71,9 @@ def upgrade():
     sa.Column('pro_dec', sa.String(length=300), nullable=False),
     sa.Column('pro_cont', sa.String(length=10), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
-    sa.Column('filename', sa.String(length=255), nullable=False),
+    sa.Column('filename', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['category.cat_id'], ),
-    sa.PrimaryKeyConstraint('pro_id'),
-    sa.UniqueConstraint('filename')
+    sa.PrimaryKeyConstraint('pro_id')
     )
     op.create_table('trader_category_association',
     sa.Column('trader_id', sa.Integer(), nullable=True),

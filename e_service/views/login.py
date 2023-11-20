@@ -66,6 +66,8 @@ def user_login():
 @app.route('/login/trader', methods=['GET', 'POST'])
 def login_trader():
     form = LoginForm()
+    trader = None  # Declare with a default value
+
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
@@ -78,8 +80,10 @@ def login_trader():
             return redirect(url_for('trader_dashboard'))
 
         flash('Invalid email or password.', 'danger')
+    print(trader)
 
-    return render_template('trader_login.html', form=form)
+    return render_template('trader_login.html', form=form, trader=trader)
+
 
 @app.route('/login/admin', methods=['GET', 'POST'])
 def login_admin():

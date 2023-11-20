@@ -3,6 +3,10 @@ from e_service.app import app, db
 from datetime import datetime
 from flask_login import UserMixin
 from flask_migrate import Migrate
+from datetime import datetime
+from itsdangerous import TimedJSONWebSignatureSerializer, BadSignature, SignatureExpired
+
+
 
 
 migrate = Migrate(app, db)
@@ -27,6 +31,7 @@ trader_category_association = db.Table(
     db.Column('category_id', db.Integer, db.ForeignKey('category.cat_id'))
 )
 
+
 class Trader(db.Model, UserMixin):
     __tablename__ = 'traders'
 
@@ -39,7 +44,8 @@ class Trader(db.Model, UserMixin):
     is_active = db.Column(db.Boolean, default=True)
     coords = db.relationship('TraderLocation', backref='user', lazy=True)
     services = db.relationship('Product', secondary=trader_product_association, backref='traders', lazy='dynamic')
-
+    reset_token = db.Column(db.String(100), nullable=True)
+    
 
     def __init__(self, full_name, email, phone_number, business_name, password):
         self.full_name = full_name
@@ -56,6 +62,21 @@ class Trader(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def generate_reset_token(self, expires_sec=1800):
+        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
+        self.reset_token = s.dumps({'trader_id': self.trader_id}).decode('utf-8')
+        db.session.commit()
+        return self.reset_token
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        try:
+            trader_id = s.loads(token)['trader_id']
+        except BadSignature:
+            return None
+        return Trader.query.get(trader_id)
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -69,7 +90,8 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     coords = db.relationship('UserLocation', backref='user', lazy=True)
-
+    reset_token = db.Column(db.String(100), nullable=True)
+    
     def __init__(self, full_name, email, phone_number, password):
         self.full_name = full_name
         self.email = email
@@ -85,7 +107,22 @@ class User(UserMixin, db.Model):
     def ping(self):
         self.last_seen = datetime.utcnow()
         db.session.add(self)
-
+    
+    def generate_reset_tokens(self, expires_sec=1800):
+        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
+        self.reset_token = s.dumps({'id_user': self.id_user}).decode('utf-8')
+        db.session.commit()
+        return self.reset_token
+    
+    @staticmethod
+    def verify_reset_tokens(token):
+        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        try:
+            id_user = s.loads(token)['id_user']
+        except BadSignature:
+            return None
+        return User.query.get(id_user)
+    
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
 

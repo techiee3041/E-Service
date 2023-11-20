@@ -1,0 +1,42 @@
+<!-- edit_product.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Edit Service</title>
+</head>
+<body>
+    <h1>Edit Service</h1>
+
+    <form method="post" action="{{ url_for('edit_product', product_id=product.pro_id) }}" enctype="multipart/form-data">
+        <label for="pro_name">Product Name:</label>
+        <input type="text" name="pro_name" value="{{ product.pro_name }}" required>
+
+        <label for="pro_dec">Description:</label>
+        <textarea name="pro_dec" required>{{ product.pro_dec }}</textarea>
+
+        <label for="pro_cont">Contact:</label>
+        <input type="text" name="pro_cont" value="{{ product.pro_cont }}" required>
+
+        <label for="category">Category:</label>
+        <select name="category" required>
+            {% for category in categories %}
+                <option value="{{ category.category_id }}" {% if category.category_id == product.category_id %}selected{% endif %}>
+                    {{ category.category_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="file">Choose a new image:</label>
+        <input type="file" name="file">
+
+        <button type="submit">Update Service</button>
+    </form>
+
+   <a href="/fetch/products/{{trader_id}}">Back to My Services</a>
+
+</body>
+</html>

@@ -5,7 +5,7 @@ import os
 from e_service.app import app, db
 from haversine import haversine
 from flask_login import current_user
-
+from itsdangerous import TimedSerializer as Serializer
 
 
 # UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
@@ -248,60 +248,54 @@ def save_trader_coordinates():
 
 @app.route('/fetch_user_and_trader_locations/<int:user_id>', methods=['GET'])
 def fetch_user_and_trader_locations(user_id):
-    # Fetch the user's location
     user_location = UserLocation.query.filter_by(user_id=user_id).first()
+
     if user_location is None:
         return jsonify({'error': 'User location not found'})
 
     user_lat, user_lon = user_location.latitude, user_location.longitude
-
-    # Fetch nearby traders within 1km along with their services
     nearby_traders = []
 
     for trader_location in TraderLocation.query.all():
         trader_lat, trader_lon = trader_location.latitude, trader_location.longitude
-        print(f'user_lat: {user_lat}, user_lon: {user_lon}, trader_lat: {trader_lat}, trader_lon: {trader_lon}')
         distance = haversine((user_lat, user_lon), (trader_lat, trader_lon))
 
         if distance <= 100000:
-            # Fetch services offered by the trader
-
             trader_id = trader_location.trader_id
-            print(f"Trader ID: {trader_location.trader_id}")
-            trader = Trader.query.get(trader_id)
-            trader_info = db.session.query(Trader).filter_by(trader_id=trader_id).first()
-            
-            print(f"Trader ID: {trader_location.trader_id}")
+            trader_info = Trader.query.get(trader_id)
 
-            # Print data from trader_product_association
-            association_data = db.session.query(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
-            print(f"Association Data: {association_data}")
+            # Fetch services offered by the trader
+            trader_services_query = (
+                db.session.query(Product)
+                .join(trader_product_association)
+                .filter_by(trader_id=trader_id)
+            )
 
-            # Print data from the Product table
-            trader_products = db.session.query(Product).join(trader_product_association).filter_by(trader_id=trader_location.trader_id).all()
-            print(f"Trader Products: {trader_products}")
-
-            trader_services_query = Product.query.join(trader_product_association).filter_by(trader_id=trader_location.trader_id)
-            print(f"Query: {str(trader_services_query)}")
-            
             trader_services = trader_services_query.all()
 
-            # Now, iterate over the trader_services list
+            trader_services_data = []
+
             for service in trader_services:
-                # Access service attributes, e.g., service.pro_name, service.category, etc.
-                print(f"Service Name: {service.pro_name}, Category: {service.category.category_name}")
+                # Access service attributes, handle None cases
+                category_name = getattr(service.category, 'category_name', None)
+                pro_name = getattr(service, 'pro_name', None)
+                pro_dec = getattr(service, 'pro_dec', None)
+                pro_cont = getattr(service, 'pro_cont', None)
+
+                # Append service data to the list
+                trader_services_data.append({
+                    'category': category_name,
+                    'description': pro_dec,
+                    'product_name': pro_name,
+                    'phone_number': pro_cont
+                })
 
             nearby_traders.append({
-                'trader_id': trader_location.trader_id,
+                'trader_id': trader_id,
                 'full_name': trader_info.full_name,
                 'phone_number': trader_info.phone_number,
                 'distance': distance,
-                'services': [{
-                    'category': service.category.category_name,
-                    'description': service.pro_dec,
-                    'product_name': service.pro_name,
-                    'phone_number': service.pro_cont
-                } for service in trader_services]
+                'services': trader_services_data
             })
 
     # Categorize traders
@@ -314,6 +308,10 @@ def fetch_user_and_trader_locations(user_id):
 
         for service in trader['services']:
             category = service['category']
+
+            # Skip entries with None category
+            if category is None:
+                continue
 
             if category not in categorized_traders:
                 categorized_traders[category] = []
@@ -329,3 +327,45 @@ def fetch_user_and_trader_locations(user_id):
     # Return the categorized traders as a dictionary
     print(categorized_traders)
     return jsonify(categorized_traders)
+
+@app.route('/edit/product/<int:product_id>', methods=['GET', 'POST'])
+def edit_product(product_id):
+    product = Product.query.get_or_404(product_id)
+
+    if request.method == 'POST':
+        # Update product information based on form data
+        product.pro_name = request.form['pro_name']
+        product.pro_dec = request.form['pro_dec']
+        product.pro_cont = request.form['pro_cont']
+        product.category_id = request.form['category']
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        flash('Product information updated successfully!', 'success')
+        return redirect(url_for('trader_dashboard'))
+
+    categories = Category.query.all()
+
+    return render_template('edit_product.html', product=product, categories=categories)
+
+# Delete Product
+@app.route('/delete/product/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    product = Product.query.get_or_404(product_id)
+
+    # Delete the product from the database
+    db.session.delete(product)
+    db.session.commit()
+
+    flash('Product deleted successfully!', 'success')
+    return redirect(url_for('trader_dashboard'))
+
+
+@app.route('/fetch/products/<int:trader_id>')
+def fetch_products(trader_id):
+    # Assuming you have a relationship between Trader and Product in your models
+    trader = Trader.query.get_or_404(trader_id)
+    products = trader.services.all()  # Assuming 'products' is the relationship name
+
+    return render_template('product_list.html', products=products, trader=trader)

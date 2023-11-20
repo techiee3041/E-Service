@@ -7,7 +7,7 @@
     <title>E-Service</title>
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
 </head>
 
@@ -16,6 +16,7 @@
         <h1>E-service</h1>
         <ul class="nav-list">
             <li class="nav-items"><a href="#">Home</a></li>
+            <li class="nav-items"><a href="/fetch/products/{{trader_id}}">My services</a></li>
             <li class="nav-items"><a href="/logout">logout</a></li>
             <li class="nav-items"><a href="#">{{ current_user.full_name }}</a>WELCOME</li>
         </ul>
@@ -27,11 +28,131 @@
         <div>
             <h1>Trader Dashboard</h1>
             <button id="pinLocationButton">Pin Location</button>
+            <button id="trackRouteButton">Track Route</button>
             <div id="mapContainer" style="height: 400px;"></div>
             <input type="hidden" id="latitude" value="">
             <input type="hidden" id="longitude" value="">
-            <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
-            <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const pinLocationButton = document.getElementById('pinLocationButton');
+                    const trackRouteButton = document.getElementById('trackRouteButton');
+                    const mapContainer = document.getElementById('mapContainer');
+                    const latitudeInput = document.getElementById('latitude');
+                    const longitudeInput = document.getElementById('longitude');
+
+                    mapboxgl.accessToken = 'pk.eyJ1IjoiZG9yZWVuMzAiLCJhIjoiY2xvOW10Nmg3MGRqZTJrcXFpMTZjaThpbyJ9.ZjtZO_sTrQyLIS8STM9x_g';
+
+                    var map = new mapboxgl.Map({
+                        container: 'mapContainer',
+                        style: 'mapbox://styles/mapbox/streets-v11',
+                        center: [-74.5, 40], // Default center
+                        zoom: 9 // Default zoom
+                    });
+
+                    // Add a navigation control to the map
+                    map.addControl(new mapboxgl.NavigationControl());
+                    const currentTraderID = '{{ trader_id }}';
+
+                    // Event listener for the pinLocationButton
+                    $("#pinLocationButton").click(function () {
+                        // Get the user's location
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+
+                            // Update the hidden input fields with coordinates
+                            $("#latitude").val(latitude);
+                            $("#longitude").val(longitude);
+
+                            // Send the coordinates and trader's ID to the server using an AJAX request
+                            const data = {
+                                latitude: latitude,
+                                longitude: longitude,
+                                traderID: currentTraderID, // Make sure to set currentTraderID appropriately
+                            };
+
+                            $.ajax({
+                                url: '/api/save_trader_coordinates', // Replace with your server endpoint
+                                type: 'POST',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                success: function (data) {
+                                    // Handle the response from the server (if needed)
+                                },
+                            });
+
+                            // Update the map's center and add a marker
+                            map.setCenter([longitude, latitude]);
+                            new mapboxgl.Marker().setLngLat([longitude, latitude]).addTo(map);
+                        });
+                    });
+
+                    // Event listener for the trackRouteButton
+                    $("#trackRouteButton").click(function () {
+                        // Get the user's location
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            const userLatitude = position.coords.latitude;
+                            const userLongitude = position.coords.longitude;
+
+                            // Get the trader's location from the hidden input fields
+                            const traderLatitude = parseFloat($("#latitude").val());
+                            const traderLongitude = parseFloat($("#longitude").val());
+
+                            // Unique source ID for the route
+                            const routeSourceId = 'route-source';
+
+                            // Check if the source with the given ID already exists
+                            if (map.getSource(routeSourceId)) {
+                                // Remove the existing source
+                                map.removeSource(routeSourceId);
+                            }
+
+                            // Create a Mapbox Directions API request URL
+                            const directionsURL = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLongitude},${userLatitude};${traderLongitude},${traderLatitude}?access_token=${mapboxgl.accessToken}`;
+
+                            // Fetch the route from the Directions API
+                            fetch(directionsURL)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const route = data.routes[0];
+                                    const routeCoordinates = route.geometry.coordinates;
+
+                                    // Draw the route on the map
+                                    map.addSource(routeSourceId, {
+                                        type: 'geojson',
+                                        data: {
+                                            type: 'Feature',
+                                            properties: {},
+                                            geometry: {
+                                                type: 'LineString',
+                                                coordinates: routeCoordinates
+                                            }
+                                        }
+                                    });
+
+                                    // Add a layer to the map
+                                    map.addLayer({
+                                        id: routeSourceId,
+                                        type: 'line',
+                                        source: routeSourceId,
+                                        layout: {
+                                            'line-join': 'round',
+                                            'line-cap': 'round'
+                                        },
+                                        paint: {
+                                            'line-color': '#3b9ddd',
+                                            'line-width': 8
+                                        }
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching directions:', error);
+                                });
+                        });
+                    });
+
+                });
+            </script>
         </div>
     </main>
 </body>

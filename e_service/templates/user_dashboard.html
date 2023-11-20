@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Service</title>
-    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>E-Service</title>
+        <link href="{{ url_for('static', filename='css/dashboard.css') }}"
+            rel="stylesheet">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css"
+            rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin></script>
+        <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -53,7 +62,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
-            z-index: 2;
+            z-index: 1000;
         }
 
         .modal-content {
@@ -64,6 +73,8 @@
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
+            max-height: 80%;
+            overflow-y: auto;
         }
 
         .close {
@@ -76,54 +87,72 @@
         .map-container {
             position: relative;
         }
-        
+
         .map {
             height: 400px;
             z-index: 1;
         }
 
+        .call-now-button {
+            outline: none;
+            border: none;
+            background: rgb(3, 122, 3);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .service p.category,
+        .service p.description,
+        .service p.product-name {
+            font-weight: bold;
+        }
     </style>
-</head>
+    </head>
 
-<body>
-    <nav class="navbar">
-        <h1>E-service</h1>
-        <ul class="nav-list">
-            <li class="nav-items"><a href="#">Home</a></li>
-            <li class="nav-items"><a href="/logout">logout</a></li>
-            <li class="nav-items"><button id="findServiceButton">Find Service</button></li>
-        </ul>
-        <ul>
-            <a href="#">{{ current_user.full_name }}</a>
-        </ul>
-    </nav>
-    <main>
-        <div id="myModal" class="modal" class="popup">
-            <div class="modal-content" id="modal-content">
-                <span class="close" onclick="closeModal()">&times;</span>
-                <h2>Nearby Trader Information</h2>
-                <p><strong>Trader Name:</strong> <span id="modalTraderName"></span></p>
-                <p><strong>Phone Number:</strong> <span id="modalPhoneNumber"></span></p>
-                <p><strong>Distance:</strong> <span id="modalDistance"></span> km</p>
-                <h3>Services:</h3>
-                <ul id="modalServices">
-                    <!-- Services will be dynamically added here using JavaScript -->
-                </ul>
+    <body>
+        <nav class="navbar">
+            <h1>E-service</h1>
+            <ul class="nav-list">
+                <li class="nav-items"><a href="#">Home</a></li>
+                <li class="nav-items"><a href="/logout">logout</a></li>
+                <li class="nav-items"><button id="findServiceButton">Find
+                        Service</button></li>
+            </ul>
+            <ul>
+                <a href="#">{{ current_user.full_name }}</a>
+            </ul>
+        </nav>
+        <main>
+            <div id="myModal" class="modal" class="popup">
+                <div class="modal-content" id="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2>Nearby Trader Information</h2>
+                    <p><strong>Trader Name:</strong> <span id="modalTraderName"></span></p>
+                    <p><strong>Phone Number:</strong> <span
+                            id="modalPhoneNumber"></span></p>
+                    <p><strong>Distance:</strong> <span id="modalDistance"></span>
+                        km</p>
+                    <h3>Services:</h3>
+                    <ul id="modalServices">
+                        <!-- Services will be dynamically added here using JavaScript -->
+                    </ul>
+                </div>
             </div>
-        </div>
-        <div class="map">
-            <h1><strong> Welcome to User dashboard</strong></h1>
-            <button id="pinLocationButton">Pin Location</button>
-            <div id="mapContainer" style="height: 400px;"></div>
-            <input type="hidden" id="latitude" value="">
-            <input type="hidden" id="longitude" value="">
-            <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
-            <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
-            <script src="{{ url_for('static', filename='js/user_map.js') }}"></script>
-        </div>
+            <div class="map">
+                <h1><strong> Welcome to User dashboard</strong></h1>
+                <button id="pinLocationButton">Pin Location</button>
+                <div id="mapContainer" style="height: 400px;"></div>
+                <input type="hidden" id="latitude" value>
+                <input type="hidden" id="longitude" value>
+                <input type="hidden" id="user_id" name="user_id"
+                    value="{{ user_id }}">
+                <script
+                    src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+                <script src="{{ url_for('static', filename='js/user_map.js') }}"></script>
+            </div>
 
-    </main>
-    <script>
+        </main>
+        <script>
         // Your JavaScript code here
         document.getElementById('findServiceButton').addEventListener('click', async function () {
             try {
@@ -141,6 +170,43 @@
                 console.error('Error:', error);
             }
         });
+        // Inside your client-side code
+
+        // Function to send a message
+        async function sendMessage(receiverId, content) {
+            const response = await fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    receiver_id: receiverId,
+                    content: content,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('Message sent successfully');
+            } else {
+                console.error('Error sending message:', data.error);
+            }
+        }
+
+        // Function to fetch messages
+        async function fetchMessages() {
+            const response = await fetch('/fetch_messages');
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('Fetched messages:', data);
+                // Handle and display the messages as needed
+            } else {
+                console.error('Error fetching messages:', data.error);
+            }
+        }
+
 
         function openModal(data) {
             // Display the modal
@@ -175,6 +241,18 @@
                         phoneNumber.textContent = 'Phone Number: ' + trader.service.phone_number;
                         traderItem.appendChild(phoneNumber);
 
+                        function callNow(phoneNumber) {
+                            window.open('tel:' + phoneNumber);
+                        }
+
+                        var callButton = document.createElement('button');
+                        callButton.textContent = 'Call Now';
+                        callButton.onclick = function () {
+                            callNow(trader.service.phone_number);
+                        };
+                        callButton.classList.add('call-now-button');
+                        traderItem.appendChild(callButton);
+
                         var distance = document.createElement('p');
                         distance.textContent = 'Distance: ' + trader.distance + ' km';
                         traderItem.appendChild(distance);
@@ -188,9 +266,9 @@
                         var serviceItem = document.createElement('li');
                         serviceItem.className = 'service';
                         serviceItem.innerHTML = `
-                        <p>Category: ${trader.service.category}</p>
-                        <p>Description: ${trader.service.description}</p>
-                        <p>Product Name: ${trader.service.product_name}</p>
+                        <p><strong>${trader.service.category}</strong></p>
+                        <p><strong>Description:</strong> ${trader.service.description}</p>
+                        <p><strong>Service Name:</strong> ${trader.service.product_name}</p>
                     `;
 
                         serviceList.appendChild(serviceItem);
@@ -208,7 +286,7 @@
             var modal = document.getElementById('myModal');
             modal.style.display = 'none';
         }
-        
+
         // Add this function to handle clicks outside the modal content to close it
         window.onclick = function (event) {
             var modal = document.getElementById('myModal');
@@ -217,6 +295,6 @@
             }
         };
     </script>
-</body>
+    </body>
 
 </html>

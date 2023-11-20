@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset - User</title>
+    <style>
+        /* Add CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            margin-bottom: 8px;
+        }
+
+        .form__inputs {
+            margin-bottom: 16px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .flash-messages li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <div class="container">
+            <form method="POST" action="/reset_password_user" class="form" id="resetForm">
+                <h2>Password Reset - User</h2>
+                {{ form.hidden_tag() }}
+                <div class="label__form">
+                    <label for="email" class="form-label">Email:</label>
+                    {{ form.email(class="form__inputs") }}
+                </div>
+                <button type="submit">Reset Password</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // Add JavaScript here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any client-side validation or functionality as needed
+        });
+    </script>
+</body>
+</html>
