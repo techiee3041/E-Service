@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -6,10 +7,11 @@
     font-family: 'Poppins', sans-serif;
 }
 
-
 a {
     text-decoration: none;
 }
+
+/* Navbar Styles */
 .navbar {
     display: flex;
     width: 100%;
@@ -19,11 +21,7 @@ a {
     align-items: center;
     background: linear-gradient(90deg, #800000 50%, #3498db 50%);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.left--nav {
-    display: flex;
-    align-items: center;
+    transition: background-color 0.3s ease;
 }
 
 .left--nav > h1 {
@@ -32,9 +30,8 @@ a {
     background-clip: text;
     color: transparent;
     margin-right: 20px;
-
+    transition: color 0.3s ease;
 }
-
 
 .left--nav > h1:hover {
     color: lightcoral;
@@ -49,16 +46,12 @@ a {
 .left--nav > ul > li {
     cursor: pointer;
     color: lightslategray;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .left--nav > ul > li:hover {
     color: rgb(6, 6, 26);
     text-decoration: underline;
-}
-
-.right--nav {
-    display: flex;
-    align-items: center;
 }
 
 .right--nav > h3 {
@@ -67,6 +60,7 @@ a {
     font-size: 1rem;
     cursor: pointer;
     color: lightslategray;
+    transition: color 0.3s ease;
 }
 
 .right--nav > h3:hover {
@@ -83,15 +77,16 @@ a {
     cursor: pointer;
     color: white;
     text-decoration: none;
+    transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 
 .right--nav > a:hover {
-    cursor: pointer;
     background: transparent;
     border: 1px solid green;
     color: green;
 }
 
+/* Main and Container Styles */
 main {
     width: 100%;
     display: flex;
@@ -100,6 +95,7 @@ main {
     height: 80vh;
     margin: auto;
 }
+
 .container {
     display: flex;
     flex-direction: column;
@@ -108,11 +104,32 @@ main {
     align-items: center;
     justify-content: center;
     text-align: center;
+    background: linear-gradient(45deg, #ff0000, #00f); /* Initial background gradient */
+    border-radius: 10px;
+    color: white;
+    transition: background 1s ease, color 1s ease; /* Color transition every second */
+
+    animation: changeColor 5s infinite; /* Animation to cycle through colors */
+}
+
+@keyframes changeColor {
+    0%, 100% {
+        background: linear-gradient(45deg, #ff0000, #00f); /* Red to Blue */
+    }
+    25% {
+        background: linear-gradient(45deg, #00f, #008000); /* Blue to Green */
+    }
+    50% {
+        background: linear-gradient(45deg, #008000, #ff69b4); /* Green to Pink */
+    }
+    75% {
+        background: linear-gradient(45deg, #ff69b4, #000); /* Pink to Black */
+    }
 }
 
 .container > h1 {
-    font-size: 2rem;
-    letter-spacing: 2px;
+    font-size: 2.5rem;
+    letter-spacing: 3px;
     margin-bottom: 20px;
 }
 
@@ -120,11 +137,17 @@ main {
     margin-bottom: 20px;
 }
 
-.btn-service {
+/* Button Styles */
+.btn-service,
+.button {
     text-decoration: none;
     border: none;
-    color: white;
     cursor: pointer;
+    transition: border 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.btn-service {
+    color: white;
     background: red;
     display: block;
     border-radius: 2rem;
@@ -159,21 +182,22 @@ main {
 .login:hover {
     text-decoration: underline;
 }
- body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
 
-        /* Additional styles for larger screens */
+/* Body Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #333;
+}
 
-        @media (max-width: 600px) {
-            /* Styles for screens up to 600 pixels wide (typical for mobile devices) */
-            body {
-                font-size: 14px; /* Adjust font size for better readability on smaller screens */
-            }
+/* Additional styles for larger screens */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+    }
 
-            /* Add more mobile-specific styles as needed */
-        }
+    /* Add more mobile-specific styles as needed */
+}

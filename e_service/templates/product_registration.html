@@ -57,29 +57,29 @@
     </style>
 </head>
 <body>
-    <h1>Product Registration</h1>
+    <h1>Trader Service Registration</h1>
 
     <form method="POST" action="/register/product" enctype="multipart/form-data">
-        <label for="pro_name">Product Name:</label>
+        <label for="pro_name">Service Name:</label>
         <input type="text" id="pro_name" name="pro_name" required><br><br>
 
-        <label for="pro_dec">Product Description:</label><br>
+        <label for="pro_dec">Service Description:</label><br>
         <textarea id="pro_dec" name="pro_dec" rows="4" cols="50" required></textarea><br><br>
 
         <label for="pro_cont">Business Contact:</label>
         <input type="text" id="pro_cont" name="pro_cont" required><br><br>
 
-        <label for="category">Category:</label>
+        <label for="category">Select your service:</label>
         <select id="category" name="category" required>
             {% for category in categories %}
                 <option value="{{ category.cat_id }}">{{ category.category_name }}</option>
             {% endfor %}
         </select><br><br>
 
-        <label for="file">Upload File:</label>
+        <label for="file">Upload picture of trader service:</label>
         <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png, .gif" required><br><br>
 
-        <button type="submit">Register Product</button>
+        <button type="submit">Register Service</button>
     </form>
 </body>
 </html>

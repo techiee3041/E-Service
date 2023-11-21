@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
         }
+
         .category-section {
             margin: 20px;
             border: 1px solid #ccc;
@@ -19,6 +20,7 @@
 
         .category-section > h2 {
             text-align: center;
+            transition: background-color 0.3s;
         }
 
         .trader {
@@ -71,32 +73,29 @@
 <body>
 
 <main>
-{# <!-- Existing code for displaying categorized traders -->
-{% for category, traders in categorized_traders.items() %}
-    <section class="category-section">
-        <h2>{{ category }}</h2>
-        <ul>
-            {% for trader in traders %}
-                <li class="trader" data-trader-id="{{ trader['trader_id'] }}" onclick="openModal('{{ trader['trader_name'] }}', '{{ trader['service']['phone_number'] }}', '{{ trader['distance'] }}', '{{ trader['service']['category'] }}', '{{ trader['service']['description'] }}', '{{ trader['service']['product_name'] }}')">
-                    <h3>{{ trader['trader_name'] }}</h3>
-                    <p>Phone Number: {{ trader['service']['phone_number'] }}</p>
-                    <p>Distance: {{ trader['distance'] }} km</p>
-                    <h4>Services</h4>
-                    <ul>
-                        <li class="service">
-                            <p>Category: {{ trader['service']['category'] }}</p>
-                            <p>Description: {{ trader['service']['description'] }}</p>
-                            <p>Product Name: {{ trader['service']['product_name'] }}</p>
-                        </li>
-                    </ul>
-                </li>
-            {% endfor %}
-        </ul>
-    </section>
-{% endfor %} #}
-
-
-
+    {# <!-- Existing code for displaying categorized traders -->
+    {% for category, traders in categorized_traders.items() %}
+        <section class="category-section" id="category-{{ loop.index }}">
+            <h2>{{ category }}</h2>
+            <ul>
+                {% for trader in traders %}
+                    <li class="trader" data-trader-id="{{ trader['trader_id'] }}" onclick="openModal('{{ trader['trader_name'] }}', '{{ trader['service']['phone_number'] }}', '{{ trader['distance'] }}', '{{ trader['service']['category'] }}', '{{ trader['service']['description'] }}', '{{ trader['service']['product_name'] }}')">
+                        <h3>{{ trader['trader_name'] }}</h3>
+                        <p>Phone Number: {{ trader['service']['phone_number'] }}</p>
+                        <p>Distance: {{ trader['distance'] }} km</p>
+                        <h4>Services</h4>
+                        <ul>
+                            <li class="service">
+                                <p>Category: {{ trader['service']['category'] }}</p>
+                                <p>Description: {{ trader['service']['description'] }}</p>
+                                <p>Product Name: {{ trader['service']['product_name'] }}</p>
+                            </li>
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endfor %} #}
 </main>
 
 <div class="modal">
@@ -107,7 +106,31 @@
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-    // Your JavaScript code here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Your JavaScript code here
+
+        // Function to change category section background color every second
+        function changeCategoryColor(categoryId) {
+            const categoryElement = document.getElementById(categoryId + '-h2');
+            if (categoryElement) {
+                const colors = ['#FF0000', '#FFFF00', '#0000FF', '#00FF00']; // Red, Yellow, Blue, Green
+                let currentIndex = 0;
+
+                setInterval(function() {
+                    categoryElement.style.backgroundColor = colors[currentIndex];
+                    currentIndex = (currentIndex + 1) % colors.length;
+                }, 1000);
+            }
+        }
+
+        // Change category section background color every second
+        {% for category, traders in categorized_traders.items() %}
+            changeCategoryColor('category-{{ loop.index }}');
+        {% endfor %}
+
+        // Your other JavaScript code here
+
+    });
 </script>
 
 </body>

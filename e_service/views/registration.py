@@ -8,8 +8,11 @@ from flask_login import current_user
 from itsdangerous import TimedSerializer as Serializer
 
 
-# UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+upload_folder = os.path.join(os.getcwd(), 'uploads')
+# Create the upload folder if it doesn't exist
+if not os.path.exists(upload_folder):
+    os.makedirs(upload_folder)
+app.config['UPLOAD_FOLDER'] = upload_folder
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 from e_service.models.data import Trader, User, Product, Category, UserLocation, TraderLocation, Admin, trader_product_association, trader_category_association # Import specific classes from data module
@@ -219,7 +222,7 @@ def save_coordinates():
             'message': 'Invalid request method. Use POST.'
         }
         return jsonify(response), 405
-    
+
 @app.route('/api/save_trader_coordinates', methods=['POST'])
 def save_trader_coordinates():
     if request.method == 'POST':
@@ -260,7 +263,7 @@ def fetch_user_and_trader_locations(user_id):
         trader_lat, trader_lon = trader_location.latitude, trader_location.longitude
         distance = haversine((user_lat, user_lon), (trader_lat, trader_lon))
 
-        if distance <= 100000:
+        if distance <= 5:
             trader_id = trader_location.trader_id
             trader_info = Trader.query.get(trader_id)
 

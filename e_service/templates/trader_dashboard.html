@@ -32,6 +32,76 @@
             <div id="mapContainer" style="height: 400px;"></div>
             <input type="hidden" id="latitude" value="">
             <input type="hidden" id="longitude" value="">
+             <footer>
+        <marquee behavior="scroll" direction="left">
+            Welcome to E-service designed by Doreen Momanyi and Dancan Agweli
+        </marquee>
+    </footer>
+             <style>
+    /* Add your existing styles here */
+
+    #trackRouteButton {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    #trackRouteButton.color-changing {
+        animation: colorChange 5s infinite alternate; /* Change color every 5 seconds */
+    }
+
+    @keyframes colorChange {
+        0% { background-color: #4CAF50; }
+        25% { background-color: #3498db; }
+        50% { background-color: #e74c3c; }
+        75% { background-color: #f39c12; }
+        100% { background-color: #4CAF50; }
+    }
+
+    footer {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+
+    marquee {
+        font-size: 1.2em;
+        font-weight: bold;
+        background-color: #001f3f; /* Sharp blue background */
+        color: #ff69b4; /* Pink text color */
+        padding: 5px; /* Add padding for better visual */
+    }
+
+    marquee span {
+        display: inline-block;
+        margin-right: 20px; /* Adjust as needed for spacing */
+        animation: colorChange 5s infinite alternate; /* Change color every 5 seconds */
+    }
+
+    @keyframes colorChange {
+        0% { color: #ff69b4; }
+        50% { color: #00ff00; } /* Alternating color */
+        100% { color: #ff69b4; }
+    }
+</style>
+
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const trackRouteButton = document.getElementById('trackRouteButton');
+
+        trackRouteButton.addEventListener('click', function () {
+            this.classList.toggle('color-changing');
+        });
+    });
+</script>
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     const pinLocationButton = document.getElementById('pinLocationButton');
