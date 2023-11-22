@@ -14,6 +14,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <script src="{{ url_for('static', filename='js/user_map.js') }}"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -128,7 +130,7 @@
 
         footer p {
             font-size: 1.2em;
-            animation: colorChange 1s infinite alternate; /* Change color every 1 second */
+            animation: colorChange 2s infinite alternate; /* Change color every 1 second */
         }
 
         @keyframes colorChange {
@@ -174,7 +176,7 @@
                 <h2>Nearby Trader Information</h2>
                 <p><strong>Trader Name:</strong> <span id="modalTraderName"></span></p>
                 <p><strong>Phone Number:</strong> <span id="modalPhoneNumber"></span></p>
-                <p><strong>Distance:</strong> <span id="modalDistance"></span> km</p>
+                <p><strong>Distance:</strong> <span id="modalDistance"></span> km <b></b>away from you</b></p>
                 <h3>Services:</h3>
                 <ul id="modalServices">
                     <!-- Services will be dynamically added here using JavaScript -->
@@ -182,7 +184,7 @@
             </div>
         </div>
         <div class="map">
-            <h1><strong> Welcome to User dashboard--click find service button to find trader near you</strong></h1>
+            <h1><strong> Welcome to User dashboard<br> click find service button to find trader near you within 5km range</strong></h1>
             <button id="pinLocationButton">Pin Location</button>
             <div id="mapContainer" style="height: 400px;"></div>
             <input type="hidden" id="latitude" value>
@@ -191,176 +193,182 @@
             <footer>
                 <p>Welcome to e-service (designed by Dancan Agweli and Doreen Momanyi)</p>
             </footer>
-            <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
-            <script src="{{ url_for('static', filename='js/user_map.js') }}"></script>
-        </div>
-    </main>
-    <script>
-        // Your JavaScript code here
-        document.getElementById('findServiceButton').addEventListener('click', async function () {
-            try {
-                // Assuming you have a function openModal that handles modal display
-                const user_id = '{{ user_id }}';
-                const response = await fetch(`/fetch_user_and_trader_locations/${user_id}`);
-                const data = await response.json();
+            <script>
+                // Your JavaScript code here
+                document.getElementById('findServiceButton').addEventListener('click', async function () {
+                    try {
+                        // Assuming you have a function openModal that handles modal display
+                        const user_id = '{{ user_id }}';
+                        const response = await fetch(`/fetch_user_and_trader_locations/${user_id}`);
+                        const data = await response.json();
 
-                if (response.ok) {
-                    openModal(data);
-                } else {
-                    console.error('Error fetching data:', data);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        });
-        // Inside your client-side code
-
-        // Function to send a message
-        async function sendMessage(receiverId, content) {
-            const response = await fetch('/send_message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    receiver_id: receiverId,
-                    content: content,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log('Message sent successfully');
-            } else {
-                console.error('Error sending message:', data.error);
-            }
-        }
-
-        // Function to fetch messages
-        async function fetchMessages() {
-            const response = await fetch('/fetch_messages');
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log('Fetched messages:', data);
-                // Handle and display the messages as needed
-            } else {
-                console.error('Error fetching messages:', data.error);
-            }
-        }
-
-        function openModal(data) {
-            // Display the modal
-            document.getElementById('myModal').style.display = 'block';
-
-            // Access and display the categorized traders data in the modal
-            var modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = ''; // Clear existing content
-
-            for (var category in data) {
-                if (data.hasOwnProperty(category)) {
-                    var traders = data[category];
-                    var categorySection = document.createElement('section');
-                    categorySection.className = 'category-section';
-
-                    var categoryHeading = document.createElement('h2');
-                    categoryHeading.textContent = category;
-                    categorySection.appendChild(categoryHeading);
-
-                    var traderList = document.createElement('ul');
-
-                    traders.forEach(function (trader) {
-                        var traderItem = document.createElement('li');
-                        traderItem.className = 'trader';
-                        traderItem.setAttribute('data-trader-id', trader.trader_id);
-
-                        var traderName = document.createElement('h3');
-                        traderName.textContent = trader.trader_name;
-                        traderItem.appendChild(traderName);
-
-                        var phoneNumber = document.createElement('p');
-                        phoneNumber.textContent = 'Phone Number: ' + trader.service.phone_number;
-                        traderItem.appendChild(phoneNumber);
-
-                        function callNow(phoneNumber) {
-                            window.open('tel:' + phoneNumber);
+                        if (response.ok) {
+                            openModal(data);
+                        } else {
+                            console.error('Error fetching data:', data);
                         }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                });
 
-                        var callButton = document.createElement('button');
-                        callButton.textContent = 'Call Now';
-                        callButton.onclick = function () {
-                            callNow(trader.service.phone_number);
-                        };
-                        callButton.classList.add('call-now-button');
-                        traderItem.appendChild(callButton);
-
-                        var distance = document.createElement('p');
-                        distance.textContent = 'Distance: ' + trader.distance + ' km';
-                        traderItem.appendChild(distance);
-
-                        var servicesHeading = document.createElement('h4');
-                        servicesHeading.textContent = 'Services';
-                        traderItem.appendChild(servicesHeading);
-
-                        var serviceList = document.createElement('ul');
-
-                        var serviceItem = document.createElement('li');
-                        serviceItem.className = 'service';
-                        serviceItem.innerHTML = `
-                            <p><strong>${trader.service.category}</strong></p>
-                            <p><strong>Description:</strong> ${trader.service.description}</p>
-                            <p><strong>Service Name:</strong> ${trader.service.product_name}</p>
-                        `;
-
-                        serviceList.appendChild(serviceItem);
-                        traderItem.appendChild(serviceList);
-
-                        traderList.appendChild(traderItem);
+                // Inside your client-side code
+                // Function to send a message
+                async function sendMessage(receiverId, content) {
+                    const response = await fetch('/send_message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            receiver_id: receiverId,
+                            content: content,
+                        }),
                     });
 
-                    categorySection.appendChild(traderList);
-                    modalContent.appendChild(categorySection);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        console.log('Message sent successfully');
+                    } else {
+                        console.error('Error sending message:', data.error);
+                    }
                 }
-            }
-        }
 
-        function closeModal() {
-            var modal = document.getElementById('myModal');
-            modal.style.display = 'none';
-        }
+                // Function to fetch messages
+                async function fetchMessages() {
+                    const response = await fetch('/fetch_messages');
+                    const data = await response.json();
 
-        // Add this function to handle clicks outside the modal content to close it
-        window.onclick = function (event) {
-            var modal = document.getElementById('myModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
+                    if (response.ok) {
+                        console.log('Fetched messages:', data);
+                        // Handle and display the messages as needed
+                    } else {
+                        console.error('Error fetching messages:', data.error);
+                    }
+                }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const findServiceButton = document.getElementById('findServiceButton');
+                function openModal(data) {
+                    // Display the modal
+                    document.getElementById('myModal').style.display = 'block';
 
-            setInterval(function () {
-                changeButtonColor(findServiceButton);
-            }, 1000);
+                    // Access and display the categorized traders data in the modal
+                    var modalContent = document.getElementById('modal-content');
+                    modalContent.innerHTML = ''; // Clear existing content
 
-            function changeButtonColor(button) {
-                const colors = ['#4CAF50', '#3498db', '#e74c3c', '#f39c12'];
-                const currentColor = button.style.backgroundColor;
-                const nextColor = getNextColor(currentColor, colors);
+                    // Use a set to track unique trader IDs
+                    var uniqueTraderIds = new Set();
 
-                button.style.backgroundColor = nextColor;
-            }
+                    for (var category in data) {
+                        if (data.hasOwnProperty(category)) {
+                            var traders = data[category];
+                            var categorySection = document.createElement('section');
+                            categorySection.className = 'category-section';
 
-            function getNextColor(currentColor, colorArray) {
-                const currentIndex = colorArray.indexOf(currentColor);
-                const nextIndex = (currentIndex + 1) % colorArray.length;
+                            var categoryHeading = document.createElement('h2');
+                            categoryHeading.textContent = category;
+                            categorySection.appendChild(categoryHeading);
 
-                return colorArray[nextIndex];
-            }
-        });
-    </script>
+                            var traderList = document.createElement('ul');
+
+                            traders.forEach(function (trader) {
+                                // Check if trader ID is already processed to avoid redundancy
+                                if (!uniqueTraderIds.has(trader.trader_id)) {
+                                    uniqueTraderIds.add(trader.trader_id);
+
+                                    var traderItem = document.createElement('li');
+                                    traderItem.className = 'trader';
+                                    traderItem.setAttribute('data-trader-id', trader.trader_id);
+
+                                    var traderName = document.createElement('h3');
+                                    traderName.textContent = trader.trader_name;
+                                    traderItem.appendChild(traderName);
+
+                                    var phoneNumber = document.createElement('p');
+                                    phoneNumber.textContent = 'Phone Number: ' + trader.service.phone_number;
+                                    traderItem.appendChild(phoneNumber);
+
+                                    function callNow(phoneNumber) {
+                                        window.open('tel:' + phoneNumber);
+                                    }
+
+                                    var callButton = document.createElement('button');
+                                    callButton.textContent = 'Call Now';
+                                    callButton.onclick = function () {
+                                        callNow(trader.service.phone_number);
+                                    };
+                                    callButton.classList.add('call-now-button');
+                                    traderItem.appendChild(callButton);
+
+                                    var distance = document.createElement('p');
+                                    distance.textContent = 'Distance: ' + trader.distance + ' km';
+                                    traderItem.appendChild(distance);
+
+                                    var servicesHeading = document.createElement('h4');
+                                    servicesHeading.textContent = 'Services';
+                                    traderItem.appendChild(servicesHeading);
+
+                                    var serviceList = document.createElement('ul');
+
+                                    var serviceItem = document.createElement('li');
+                                    serviceItem.className = 'service';
+                                    serviceItem.innerHTML = `
+                                        <p><strong>${trader.service.category}</strong></p>
+                                        <p><strong>Description:</strong> ${trader.service.description}</p>
+                                        <p><strong>Service Name:</strong> ${trader.service.product_name}</p>
+                                    `;
+
+                                    serviceList.appendChild(serviceItem);
+                                    traderItem.appendChild(serviceList);
+
+                                    traderList.appendChild(traderItem);
+                                }
+                            });
+
+                            categorySection.appendChild(traderList);
+                            modalContent.appendChild(categorySection);
+                        }
+                    }
+                }
+
+                function closeModal() {
+                    var modal = document.getElementById('myModal');
+                    modal.style.display = 'none';
+                }
+
+                // Add this function to handle clicks outside the modal content to close it
+                window.onclick = function (event) {
+                    var modal = document.getElementById('myModal');
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    const findServiceButton = document.getElementById('findServiceButton');
+
+                    setInterval(function () {
+                        changeButtonColor(findServiceButton);
+                    }, 1000);
+
+                    function changeButtonColor(button) {
+                        const colors = ['#4CAF50', '#3498db', '#e74c3c', '#f39c12'];
+                        const currentColor = button.style.backgroundColor;
+                        const nextColor = getNextColor(currentColor, colors);
+
+                        button.style.backgroundColor = nextColor;
+                    }
+
+                    function getNextColor(currentColor, colorArray) {
+                        const currentIndex = colorArray.indexOf(currentColor);
+                        const nextIndex = (currentIndex + 1) % colorArray.length;
+
+                        return colorArray[nextIndex];
+                    }
+                });
+            </script>
+        </div>
+    </main>
 </body>
 
 </html>

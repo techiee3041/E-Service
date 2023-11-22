@@ -4,7 +4,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from flask_migrate import Migrate
 from datetime import datetime
-from itsdangerous import TimedJSONWebSignatureSerializer, BadSignature, SignatureExpired
+
 
 
 
@@ -45,7 +45,7 @@ class Trader(db.Model, UserMixin):
     coords = db.relationship('TraderLocation', backref='user', lazy=True)
     services = db.relationship('Product', secondary=trader_product_association, backref='traders', lazy='dynamic')
     reset_token = db.Column(db.String(100), nullable=True)
-    
+
 
     def __init__(self, full_name, email, phone_number, business_name, password):
         self.full_name = full_name
@@ -62,7 +62,7 @@ class Trader(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
     def generate_reset_token(self, expires_sec=1800):
         s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
         self.reset_token = s.dumps({'trader_id': self.trader_id}).decode('utf-8')
@@ -91,7 +91,7 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     coords = db.relationship('UserLocation', backref='user', lazy=True)
     reset_token = db.Column(db.String(100), nullable=True)
-    
+
     def __init__(self, full_name, email, phone_number, password):
         self.full_name = full_name
         self.email = email
@@ -107,13 +107,13 @@ class User(UserMixin, db.Model):
     def ping(self):
         self.last_seen = datetime.utcnow()
         db.session.add(self)
-    
+
     def generate_reset_tokens(self, expires_sec=1800):
         s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
         self.reset_token = s.dumps({'id_user': self.id_user}).decode('utf-8')
         db.session.commit()
         return self.reset_token
-    
+
     @staticmethod
     def verify_reset_tokens(token):
         s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
@@ -122,7 +122,7 @@ class User(UserMixin, db.Model):
         except BadSignature:
             return None
         return User.query.get(id_user)
-    
+
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
 
@@ -220,4 +220,3 @@ class TraderLocation(db.Model):
 
     def get_id(self):
         return (self.cord_id)
-    
