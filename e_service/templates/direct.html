@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trader Tracking</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Light gray background color */
+            color: #333; /* Dark gray text color */
+        }
+
+        h2 {
+            color: #3498db; /* Blue heading color */
+        }
+
+        #mapContainer {
+            height: 400px;
+        }
+
+        #fallbackContainer {
+            display: none;
+            height: 400px;
+            background-color: #3498db; /* Blue background color */
+            text-align: center;
+            color: #fff; /* White text color */
+            font-size: 20px;
+            padding-top: 150px;
+        }
+
+        #dashboardContainer {
+            padding: 20px;
+            background-color: #fff; /* White background color for the dashboard */
+            text-align: center;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow */
+            margin-bottom: 20px;
+        }
+
+        #directions-list {
+            margin-top: 10px;
+            background-color: #fff; /* White background color for directions list */
+            padding: 10px;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow */
+        }
+
+        #trackTraderButton {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #3498db; /* Blue button color */
+            color: #fff; /* White text color */
+            border: none;
+            border-radius: 4px; /* Rounded corners */
+            cursor: pointer;
+        }
+
+        #notification {
+            color: red; /* Initial color is red */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Your map container -->
+    <div id="mapContainer"></div>
+
+    <!-- Fallback container -->
+    <div id="fallbackContainer">
+        Map Area
+        <!-- Default map image or any content -->
+        <img src="default-map-image.jpg" alt="Default Map Image" style="width: 100%; height: 100%;">
+    </div>
+
+    <!-- Dashboard container -->
+    <div id="dashboardContainer">
+        <h2>Trader Dashboard</h2>
+        <p>Current Location: Latitude - <span id="currentLat"></span>, Longitude - <span id="currentLon"></span></p>
+        <!-- You can add more trader information here -->
+    </div>
+
+    <!-- Button to track the trader -->
+    <button id="trackTraderButton">Track Trader</button>
+
+    <!-- Container for displaying turn-by-turn directions -->
+    <div id="directions-list"></div>
+
+    <!-- Notification statement -->
+    <p id="notification">The system is still under development. Feel free to use call service if the map doesn't show.</p>
+
+    <!-- Add Mapbox JS script here -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+
+    <!-- Your JavaScript code -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mapboxglAccessToken = 'pk.eyJ1IjoiZG9yZWVuMzAiLCJhIjoiY2xvOW10Nmg3MGRqZTJrcXFpMTZjaThpbyJ9.ZjtZO_sTrQyLIS8STM9x_g';
+            const mapContainer = document.getElementById('mapContainer');
+            const fallbackContainer = document.getElementById('fallbackContainer');
+            const dashboardContainer = document.getElementById('dashboardContainer');
+            const trackTraderButton = document.getElementById('trackTraderButton');
+            const directionsList = document.getElementById('directions-list');
+            const notification = document.getElementById('notification');
+            const currentLat = document.getElementById('currentLat');
+            const currentLon = document.getElementById('currentLon');
+
+            // Initialize Mapbox map with the user's location
+            const map = new mapboxgl.Map({
+                container: 'mapContainer',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [userLon, userLat], // Initialize with user's location
+                zoom: 12, // Initial zoom level
+            });
+
+            // Update current location in the dashboard
+            function updateCurrentLocation(lat, lon) {
+                currentLat.textContent = lat.toFixed(6);
+                currentLon.textContent = lon.toFixed(6);
+            }
+
+            // Function to calculate and display route
+            function calculateAndDisplayRoute() {
+                const start = `${userLon},${userLat}`;
+                const end = `${traderLon},${traderLat}`;
+                const directionsUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${start};${end}?access_token=${mapboxglAccessToken}`;
+
+                fetch(directionsUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.routes && data.routes.length > 0) {
+                            // Extract route information
+                            const route = data.routes[0];
+
+                            // Extract step-by-step directions
+                            const steps = route.legs[0].steps;
+
+                            // Display the route on the map
+                            map.addLayer({
+                                id: 'route',
+                                type: 'line',
+                                source: {
+                                    type: 'geojson',
+                                    data: {
+                                        type: 'Feature',
+                                        properties: {},
+                                        geometry: {
+                                            type: 'LineString',
+                                            coordinates: route.geometry.coordinates,
+                                        },
+                                    },
+                                },
+                                layout: {
+                                    'line-join': 'round',
+                                    'line-cap': 'round',
+                                },
+                                paint: {
+                                    'line-color': '#3887BE',
+                                    'line-width': 5,
+                                },
+                            });
+
+                            // Display turn-by-turn directions to the user
+                            steps.forEach((step, index) => {
+                                const direction = document.createElement('div');
+                                direction.textContent = `${index + 1}. ${step.maneuver.instruction}`;
+                                directionsList.appendChild(direction);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Change the notification color to blue on error
+                        notification.style.color = 'blue';
+                        notification.textContent = 'An error occurred. Please use call service.';
+                    });
+            }
+
+            // Function to show the fallback container
+            function showFallbackContainer() {
+                mapContainer.style.display = 'none';
+                fallbackContainer.style.display = 'block';
+            }
+
+            // When the "Track Trader" button is clicked, calculate and display the route
+            trackTraderButton.addEventListener('click', function () {
+                calculateAndDisplayRoute();
+                showFallbackContainer(); // Hide map and show fallback container
+            });
+
+            // Example: Update current location in the dashboard (you can replace this with real-time data)
+            updateCurrentLocation(userLat, userLon);
+        });
+    </script>
+</body>
+
+</html>

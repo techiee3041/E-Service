@@ -64,14 +64,14 @@ class Trader(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def generate_reset_token(self, expires_sec=1800):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
+        s = TimedJSONWebSignatureSerializer(app.config['DOREEN_DANCAN'], expires_in=expires_sec)
         self.reset_token = s.dumps({'trader_id': self.trader_id}).decode('utf-8')
         db.session.commit()
         return self.reset_token
 
     @staticmethod
     def verify_reset_token(token):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        s = TimedJSONWebSignatureSerializer(app.config['DOREEN_DANCAN'])
         try:
             trader_id = s.loads(token)['trader_id']
         except BadSignature:
@@ -109,14 +109,14 @@ class User(UserMixin, db.Model):
         db.session.add(self)
 
     def generate_reset_tokens(self, expires_sec=1800):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expires_sec)
+        s = TimedJSONWebSignatureSerializer(app.config['DOREEN_DANCAN'], expires_in=expires_sec)
         self.reset_token = s.dumps({'id_user': self.id_user}).decode('utf-8')
         db.session.commit()
         return self.reset_token
 
     @staticmethod
     def verify_reset_tokens(token):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        s = TimedJSONWebSignatureSerializer(app.config['DOREEN_DANCAN'])
         try:
             id_user = s.loads(token)['id_user']
         except BadSignature:
@@ -171,6 +171,7 @@ class Product(db.Model):
 
     pro_id = db.Column(db.Integer, primary_key=True)
     pro_name = db.Column(db.String(100), nullable=False)
+    product_link = db.Column(db.String(255), nullable=False)
     pro_dec = db.Column(db.String(300), nullable=False)
     pro_cont = db.Column(db.String(10), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.cat_id'), nullable=False)
@@ -179,10 +180,11 @@ class Product(db.Model):
     # trader_id = db.Column(db.Integer, db.ForeignKey('traders.trader_id'), nullable=False)
     # trader = db.relationship('Trader', backref=db.backref('products', lazy=True))
 
-    def __init__(self, pro_name, pro_dec, pro_cont, filename, category_id):
+    def __init__(self, pro_name, pro_dec, pro_cont, filename, category_id, product_link):
         self.pro_name = pro_name
         self.pro_dec = pro_dec
         self.pro_cont = pro_cont
+        self.product_link = product_link
         self.filename = filename
         self.category_id = category_id
 

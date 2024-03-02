@@ -92,5 +92,4 @@ def reset_password_user(token):
         flash('Your password has been reset!', 'success')
         return redirect(url_for('user_login'))  # Assuming you have a route for user login
 
-    return render_template('reset_password_user.html')  
-
+    return render_template('reset_password_user.html')

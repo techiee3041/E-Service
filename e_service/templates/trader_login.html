@@ -1,42 +1,144 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>E-service</title>
     <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet">
-  </head>
-  <body>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Ensure the body fills the entire viewport height */
+        }
+
+        .container {
+            width: 90%; /* Set width to 90% */
+            max-width: 400px; /* Max width for larger screens */
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: auto; /* Center the form */
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-weight: bold; /* Make the text bold */
+            margin-bottom: 20px; /* Add some bottom margin for spacing */
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form__inputs {
+            width: calc(100% - 20px); /* Adjusted width */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensure padding and border are included in width calculation */
+        }
+
+        button[type="submit"] {
+            width: 100%; /* Make button full width */
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 0; /* Remove default bottom margin */
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .flash-messages {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+            margin-bottom: 0; /* Remove default bottom margin */
+        }
+
+        .flash-messages li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
 <section>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flash-messages">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flash-messages">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     {% endwith %}
-        <div class="container">
-            <!-- login_trader.html -->
-            <form method="POST" action="/login/trader" class="form">
+    <div class="container">
+        <!-- login_trader.html -->
+        <form method="POST" action="/login/trader" class="form">
             <h2>E-Service Trader Login</h2>
-                    {{ form.hidden_tag() }}
-                <div class="label__form">
-                    <label for="email" class="form-label">Email:</label>
-                    {{ form.email(class="form__inputs") }}
-                </div>
-                <div class="label__form">
-                    <label for="password" class="form-label">Password:</label>
-                    {{ form.password(class="form__inputs") }}
-                </div>
-                <button type="submit">Login</button>
-                <p>If not registred, register <a href="/register/trader">here</a></p>
-                <p><a href="/reset_password_trader">Forgot Password</a></p>
-            </form>
-        </div>
+            {{ form.hidden_tag() }}
+            <div class="label__form">
+                <label for="email" class="form-label">Email:</label>
+                {{ form.email(class="form__inputs") }}
+            </div>
+            <div class="label__form">
+                <label for="password" class="form-label">Password:</label>
+                {{ form.password(class="form__inputs") }}
+            </div>
+            <button type="submit">Login</button>
+            <p>If not registered, register <a href="/register/trader">here</a></p>
+            <p><a href="/reset_password_trader">Forgot Password</a></p>
+        </form>
+    </div>
 </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-  </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</body>
 </html>

@@ -24,11 +24,6 @@ a {
     transition: background-color 0.3s ease;
 }
 
-.left--nav, .right--nav {
-    width: 100%;
-    text-align: center;
-}
-
 .left--nav > h1 {
     background: linear-gradient(to right, #ff0000, #9c3838);
     -webkit-background-clip: text;
@@ -44,8 +39,8 @@ a {
 
 .left--nav > ul {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    list-style: none;
+    gap: 2rem;
 }
 
 .left--nav > ul > li {
@@ -109,26 +104,26 @@ main {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: linear-gradient(45deg, #ff0000, #00f);
+    background: linear-gradient(45deg, #ff0000, #00f); /* Initial background gradient */
     border-radius: 10px;
     color: white;
-    transition: background 1s ease, color 1s ease;
+    transition: background 1s ease, color 1s ease; /* Color transition every second */
 
-    animation: changeColor 5s infinite;
+    animation: changeColor 5s infinite; /* Animation to cycle through colors */
 }
 
 @keyframes changeColor {
     0%, 100% {
-        background: linear-gradient(45deg, #ff0000, #00f);
+        background: linear-gradient(45deg, #ff0000, #00f); /* Red to Blue */
     }
     25% {
-        background: linear-gradient(45deg, #00f, #008000);
+        background: linear-gradient(45deg, #00f, #008000); /* Blue to Green */
     }
     50% {
-        background: linear-gradient(45deg, #008000, #ff69b4);
+        background: linear-gradient(45deg, #008000, #ff69b4); /* Green to Pink */
     }
     75% {
-        background: linear-gradient(45deg, #ff69b4, #000);
+        background: linear-gradient(45deg, #ff69b4, #000); /* Pink to Black */
     }
 }
 
@@ -143,7 +138,8 @@ main {
 }
 
 /* Button Styles */
-.btn-service, .button {
+.btn-service,
+.button {
     text-decoration: none;
     border: none;
     cursor: pointer;

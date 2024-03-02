@@ -105,6 +105,7 @@ def register_product():
         pro_name = request.form['pro_name']
         pro_dec = request.form['pro_dec']
         pro_cont = request.form['pro_cont']
+        product_link = request.form['product_link']
         category_id = request.form['category']
 
         if 'file' not in request.files:
@@ -127,6 +128,7 @@ def register_product():
                 pro_dec=pro_dec,
                 pro_cont=pro_cont,
                 category_id=category_id,
+                product_link=product_link,
                 filename=filename
             )
 
@@ -248,7 +250,6 @@ def save_trader_coordinates():
             'message': 'Invalid request method. Use POST.'
         }
         return jsonify(response), 405
-
 @app.route('/fetch_user_and_trader_locations/<int:user_id>', methods=['GET'])
 def fetch_user_and_trader_locations(user_id):
     user_location = UserLocation.query.filter_by(user_id=user_id).first()
@@ -284,12 +285,14 @@ def fetch_user_and_trader_locations(user_id):
                 pro_name = getattr(service, 'pro_name', None)
                 pro_dec = getattr(service, 'pro_dec', None)
                 pro_cont = getattr(service, 'pro_cont', None)
+                product_link = getattr(service, 'product_link', None)
 
                 # Append service data to the list
                 trader_services_data.append({
                     'category': category_name,
                     'description': pro_dec,
                     'product_name': pro_name,
+                    'product_link': product_link,
                     'phone_number': pro_cont
                 })
 
@@ -298,6 +301,7 @@ def fetch_user_and_trader_locations(user_id):
                 'full_name': trader_info.full_name,
                 'phone_number': trader_info.phone_number,
                 'distance': distance,
+                'product_link': product_link,  # Make sure product is defined
                 'services': trader_services_data
             })
 
@@ -341,6 +345,7 @@ def edit_product(product_id):
         product.pro_dec = request.form['pro_dec']
         product.pro_cont = request.form['pro_cont']
         product.category_id = request.form['category']
+        product.product_link = request.form['product_link']
 
         # Commit the changes to the database
         db.session.commit()
@@ -372,3 +377,6 @@ def fetch_products(trader_id):
     products = trader.services.all()  # Assuming 'products' is the relationship name
 
     return render_template('product_list.html', products=products, trader=trader)
+@app.route('/direct')
+def direct():
+    return render_template('direct.html')

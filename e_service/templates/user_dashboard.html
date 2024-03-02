@@ -23,12 +23,12 @@
             padding: 0;
         }
 
-        .category-section {
-            margin: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 8px;
-        }
+ .category-section {
+    margin: 20px;
+    border: 4px solid #ffc0cb; /* Pink border with 4px thickness */
+    padding: 10px;
+    border-radius: 8px;
+}
 
         .category-section>h2 {
             text-align: center;
@@ -93,13 +93,26 @@
             z-index: 1;
         }
 
-        .call-now-button {
+        .call-now-button,
+        .product-link-button,
+        #findServiceButton {
             outline: none;
             border: none;
-            background: rgb(3, 122, 3);
+            background: #4CAF50; /* Green background */
             color: white;
             padding: 10px;
             border-radius: 5px;
+            margin-top: 5px; /* Add margin between buttons */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%; /* Make the button width 100% */
+            box-sizing: border-box; /* Include padding and border in the button's total width */
+        }
+
+        .call-now-button:hover,
+        .product-link-button:hover,
+        #findServiceButton:hover {
+            background: #45a049; /* Darker green on hover */
         }
 
         .service p.category,
@@ -108,30 +121,39 @@
             font-weight: bold;
         }
 
-        #findServiceButton {
-            background-color: #4CAF50; /* Initial color */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        footer {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
+        #searchInput {
             width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f8f8f8; /* Light gray background */
+            padding-left: 40px; /* Add space for the search icon */
         }
 
-        footer p {
-            font-size: 1.2em;
-            animation: colorChange 2s infinite alternate; /* Change color every 1 second */
+        .searched-item {
+            background-color: #f3f3f3; /* Light gray background */
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
         }
+
+        .searched-category {
+            font-weight: bold;
+        }
+
+        .searched-trader {
+            color: #007bff; /* Blue color */
+        }
+        /* Style for the "View Profile" button */
+.product-link-button {
+    background-color: red; /* Red background color */
+}
+
+.product-link-button:hover {
+    background-color: blue; /* Blue background color on hover */
+}
 
         @keyframes colorChange {
             0% {
@@ -173,25 +195,24 @@
         <div id="myModal" class="modal" class="popup">
             <div class="modal-content" id="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
-                <h2>Nearby Trader Information</h2>
-                <p><strong>Trader Name:</strong> <span id="modalTraderName"></span></p>
-                <p><strong>Phone Number:</strong> <span id="modalPhoneNumber"></span></p>
-                <p><strong>Distance:</strong> <span id="modalDistance"></span> km <b></b>away from you</b></p>
-                <h3>Services:</h3>
-                <ul id="modalServices">
-                    <!-- Services will be dynamically added here using JavaScript -->
-                </ul>
+                <!-- Search Bar -->
+                <input type="text" id="searchInput" onkeyup="searchTraders()" placeholder="Search for traders...">
+                <!-- Fetched data will appear here -->
+                <ul id="traderData"></ul>
             </div>
         </div>
         <div class="map">
-            <h1><strong> Welcome to User dashboard<br> click find service button to find trader near you within 5km range</strong></h1>
+           <h1 style="text-align: center; font-family: Arial, sans-serif; color: #333; padding: 20px;">
+    <strong>Welcome to User dashboard</strong><br>
+    <span style="font-size: 18px;">Click the "Find Service" button to locate traders within a 5km range.</span>
+</h1>
             <button id="pinLocationButton">Pin Location</button>
             <div id="mapContainer" style="height: 400px;"></div>
             <input type="hidden" id="latitude" value>
             <input type="hidden" id="longitude" value>
             <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
             <footer>
-                <p>Welcome to e-service (designed by Dancan Agweli and Doreen Momanyi)</p>
+                <p>Welcome to e-service (designed by Dancan Agweli)</p>
             </footer>
             <script>
                 // Your JavaScript code here
@@ -248,12 +269,45 @@
                     }
                 }
 
+                // Function to search for traders based on input in the search bar
+               function searchTraders() {
+    var input, filter, ul, categorySections, i, j, h3, p, txtValue, foundInSection;
+    input = document.getElementById('searchInput');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById('traderData');
+    categorySections = ul.getElementsByClassName('category-section');
+
+    for (i = 0; i < categorySections.length; i++) {
+        foundInSection = false; // Initialize foundInSection flag for each category section
+        var traders = categorySections[i].getElementsByClassName('trader');
+        for (j = 0; j < traders.length; j++) {
+            h3 = traders[j].getElementsByTagName('h3')[0];
+            p = traders[j].getElementsByTagName('p');
+            txtValue = h3.textContent || h3.innerText;
+            for (var k = 0; k < p.length; k++) {
+                txtValue += p[k].textContent || p[k].innerText;
+            }
+            // Check if the trader matches the filter
+            var found = txtValue.toUpperCase().indexOf(filter) > -1;
+            if (found) {
+                traders[j].style.display = ''; // Show the trader
+                foundInSection = true; // Set foundInSection flag to true
+            } else {
+                traders[j].style.display = 'none'; // Hide the trader
+            }
+        }
+        // Show/hide category section based on the presence of matching traders
+        categorySections[i].style.display = foundInSection ? '' : 'none';
+    }
+}
+
+
                 function openModal(data) {
                     // Display the modal
                     document.getElementById('myModal').style.display = 'block';
 
                     // Access and display the categorized traders data in the modal
-                    var modalContent = document.getElementById('modal-content');
+                    var modalContent = document.getElementById('traderData');
                     modalContent.innerHTML = ''; // Clear existing content
 
                     // Use a set to track unique trader IDs
@@ -281,7 +335,8 @@
                                     traderItem.setAttribute('data-trader-id', trader.trader_id);
 
                                     var traderName = document.createElement('h3');
-                                    traderName.textContent = trader.trader_name;
+                                    traderName.textContent = 'Trader/Business: ' +
+                                    trader.trader_name;
                                     traderItem.appendChild(traderName);
 
                                     var phoneNumber = document.createElement('p');
@@ -300,8 +355,17 @@
                                     callButton.classList.add('call-now-button');
                                     traderItem.appendChild(callButton);
 
+                                    // Add product button
+                                    var productButton = document.createElement('button');
+                                    productButton.textContent = 'view trader profile';
+                                    productButton.onclick = function () {
+                                        window.open(trader.service.product_link, '_blank');
+                                    };
+                                    productButton.classList.add('product-link-button');
+                                    traderItem.appendChild(productButton);
+
                                     var distance = document.createElement('p');
-                                    distance.textContent = 'Distance: ' + trader.distance + ' km';
+                                    distance.textContent = 'Distance: ' + trader.distance + ' Km away from you';
                                     traderItem.appendChild(distance);
 
                                     var servicesHeading = document.createElement('h4');
@@ -366,9 +430,12 @@
                         return colorArray[nextIndex];
                     }
                 });
+
             </script>
         </div>
     </main>
 </body>
 
 </html>
+
+ChatGPT

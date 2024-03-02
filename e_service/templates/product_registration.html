@@ -14,7 +14,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh; /* Ensure the body fills the entire viewport height */
         }
 
         h1 {
@@ -25,7 +25,8 @@
         }
 
         form {
-            width: 300px; /* Set a specific width */
+            width: 90%; /* Set width to 90% */
+            max-width: 400px; /* Max width for larger screens */
             background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 10px;
@@ -45,14 +46,16 @@
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box; /* Ensure padding and border are included in width calculation */
         }
 
         button {
-            background-color: #ff69b4;
-            color: #fff;
-            padding: 10px 20px;
+            width: 100%; /* Make button full width */
+            padding: 10px;
             border: none;
             border-radius: 5px;
+            background-color: #ff69b4;
+            color: #fff;
             cursor: pointer;
             transition: background-color 0.3s;
         }
@@ -102,27 +105,30 @@
 
     <form method="POST" action="/register/product" enctype="multipart/form-data">
         <div class="warning-message">
-            <p><strong>Warning:</strong> Kindly, you are advised<br> to only register one service for security purposes.</p>
+            <p><strong>Warning:</strong> Kindly, you are advised<br> to only register one service for security purposes.<br> Please provide profile link e.g facebook link,linkedn,tiktok,twitter, e-commerce web</p>
         </div>
 
         <label for="pro_name">Service Name:</label>
-        <input type="text" id="pro_name" name="pro_name" required><br><br>
+        <input type="text" id="pro_name" name="pro_name" required>
 
-        <label for="pro_dec">Service Description & Business area:</label><br>
-        <textarea id="pro_dec" name="pro_dec" rows="4" cols="50" required></textarea><br><br>
+        <label for="pro_dec">Service Description & Business area:</label>
+        <textarea id="pro_dec" name="pro_dec" rows="4" cols="50" required></textarea>
 
         <label for="pro_cont">Business Contact:</label>
-        <input type="text" id="pro_cont" name="pro_cont" required><br><br>
+        <input type="text" id="pro_cont" name="pro_cont" required>
 
         <label for="category">Select your service:</label>
         <select id="category" name="category" required>
             {% for category in categories %}
                 <option value="{{ category.cat_id }}">{{ category.category_name }}</option>
             {% endfor %}
-        </select><br><br>
+        </select>
 
         <label for="file">Upload picture of trader service:</label>
-        <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png, .gif" required><br><br>
+        <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png, .gif" required>
+
+        <label for="product_link">insert your web or profile Link:</label>
+        <input type="text" id="product_link" name="product_link" required> <!-- New text box for link adding -->
 
         <button type="submit">Register Service</button>
     </form>
